@@ -1,0 +1,47 @@
+[
+  {
+    "name": "Login (Fleet Manager)",
+    "success": true,
+    "error": ""
+  },
+  {
+    "name": "Fetch Dashboard KPIs",
+    "success": true,
+    "error": ""
+  },
+  {
+    "name": "Create Vehicle",
+    "success": true,
+    "error": ""
+  },
+  {
+    "name": "List Vehicles",
+    "success": true,
+    "error": ""
+  },
+  {
+    "name": "Create Driver",
+    "success": false,
+    "error": "Access denied. Required role(s): safety_officer. Your role: fleet_manager"
+  },
+  {
+    "name": "List Drivers",
+    "success": true,
+    "error": ""
+  },
+  {
+    "name": "Trip Operations",
+    "success": false,
+    "error": "Skipped because Vehicle or Driver creation failed"
+  },
+  {
+    "name": "Fetch Efficiency Report",
+    "success": false,
+    "error": "Request failed with status code 404"
+  },
+  {
+    "name": "Fetch Cost Report",
+    "success": false,
+    "error": "Request failed with status code 404"
+  }
+]

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | TransitOps</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    
+    <div class="main-content">
+      <header class="app-header">
+        <div class="header-title">Operational Dashboard</div>
+        <div class="header-actions">
+        </div>
+      </header>
+
+      <main class="page-content">
+        <h1 class="page-title">Fleet Overview</h1>
+        <p class="page-subtitle">Real-time telemetry and operational status</p>
+
+        <div class="stat-grid" id="kpi-grid">
+          <!-- Populated by JS -->
+        </div>
+
+        <div class="dashboard-grid mt-6">
+          <div class="col-span-8 card">
+            <div class="card-header">
+              <h3 class="card-title">Financial Summary (Completed Trips)</h3>
+            </div>
+            <div class="stat-grid" style="grid-template-columns: 1fr 1fr; margin-bottom:0;" id="financial-grid">
+              <!-- Populated by JS -->
+            </div>
+            <div class="mt-6">
+              <canvas id="profitabilityChart" style="max-height: 250px; width: 100%;"></canvas>
+            </div>
+          </div>
+          <div class="col-span-4 card">
+            <div class="card-header">
+              <h3 class="card-title">Quick Actions</h3>
+            </div>
+            <div class="flex flex-col gap-3">
+              <a href="trips.html" class="btn btn-primary w-full justify-between">
+                <span>Dispatch Trip</span> <span>→</span>
+              </a>
+              <a href="vehicles.html" class="btn btn-secondary w-full justify-between">
+                <span>View Fleet</span> <span>→</span>
+              </a>
+              <a href="maintenance.html" class="btn btn-ghost w-full justify-between" style="border: 1px dashed var(--color-border);">
+                <span>Log Maintenance</span> <span>→</span>
+              </a>
+            </div>
+            <div class="card-header mt-8">
+              <h3 class="card-title">Fleet Composition</h3>
+            </div>
+            <div class="mt-4 flex justify-center">
+              <canvas id="fleetStatusChart" style="max-height: 200px; max-width: 100%;"></canvas>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

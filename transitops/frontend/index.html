@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | TransitOps</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-left">
+      <div class="auth-hero-logo">
+        <div class="auth-logo-icon">🚚</div>
+        <div class="auth-brand">Transit<span>Ops</span></div>
+      </div>
+      <h1 class="auth-headline">Smart Transport<br>Operations <span class="highlight">Platform</span></h1>
+      <p class="auth-subline">Digitize the full lifecycle of your fleet operations with real-time tracking, intelligent rule enforcement, and comprehensive expense management.</p>
+      
+      <div class="auth-features">
+        <div class="auth-feature">
+          <span class="auth-feature-icon">🛡️</span>
+          <span class="auth-feature-text">Hard business rules prevent unsafe dispatch</span>
+        </div>
+        <div class="auth-feature">
+          <span class="auth-feature-icon">📊</span>
+          <span class="auth-feature-text">Real-time operational ROI and fleet utilization</span>
+        </div>
+        <div class="auth-feature">
+          <span class="auth-feature-icon">🔒</span>
+          <span class="auth-feature-text">Role-based access for your entire team</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="auth-right">
+      <div class="auth-form-container">
+        <h2 class="auth-form-title">Welcome back</h2>
+        <p class="auth-form-subtitle">Sign in to your account to continue</p>
+        
+        <form id="login-form">
+          <div class="form-group">
+            <label class="form-label">Email address</label>
+            <input type="email" id="email" class="form-input" placeholder="manager@transitops.com" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" id="password" class="form-input" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn btn-primary w-full mt-4" style="height: 48px; font-size: 1rem;">Sign In</button>
+        </form>
+
+        <div class="auth-demo-accounts">
+          <div class="auth-demo-title">Demo Credentials (Password: password123)</div>
+          <div class="demo-account" onclick="fillLogin('manager@transitops.com')">
+            <span class="demo-email">manager@transitops.com</span>
+            <span class="demo-role">Fleet Mgr</span>
+          </div>
+          <div class="demo-account" onclick="fillLogin('dispatcher@transitops.com')">
+            <span class="demo-email">dispatcher@transitops.com</span>
+            <span class="demo-role">Dispatcher</span>
+          </div>
+          <div class="demo-account" onclick="fillLogin('safety@transitops.com')">
+            <span class="demo-email">safety@transitops.com</span>
+            <span class="demo-role">Safety</span>
+          </div>
+          <div class="demo-account" onclick="fillLogin('analyst@transitops.com')">
+            <span class="demo-email">analyst@transitops.com</span>
+            <span class="demo-role">Finance</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    // Redirect if already logged in
+    if (localStorage.getItem('transitops_token')) {
+      window.location.href = 'dashboard.html';
+    }
+
+    function fillLogin(email) {
+      document.getElementById('email').value = email;
+      document.getElementById('password').value = 'password123';
+    }
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const btn = e.target.querySelector('button');
+      
+      try {
+        btn.disabled = true;
+        btn.innerHTML = 'Signing in...';
+        const res = await api.login({ email, password });
+        if (res.success) {
+          auth.save(res.token, res.user);
+          window.location.href = 'dashboard.html';
+        }
+      } catch (err) {
+        toast.error('Login Failed', err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Sign In';
+      }
+    });
+  </script>
+</body>
+</html>

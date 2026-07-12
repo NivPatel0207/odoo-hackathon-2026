@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reports & Analytics | TransitOps</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    
+    <div class="main-content">
+      <header class="app-header">
+        <div class="header-title">Reports & Analytics</div>
+        <div class="header-actions">
+          <button class="btn btn-secondary" onclick="exportPDF()" id="btn-export-pdf">📄 Export PDF</button>
+          <button class="btn btn-primary" onclick="exportCSV()" id="btn-export">📥 Export Trips CSV</button>
+        </div>
+      </header>
+
+      <main class="page-content" id="report-content">
+        
+        <div class="dashboard-grid">
+          
+          <!-- Fuel Efficiency Report -->
+          <div class="col-span-12 card p-0 mb-6" id="efficiency-report-card">
+            <div class="card-header p-5 pb-0 border-b-0">
+              <h3 class="card-title">Vehicle Fuel Efficiency</h3>
+            </div>
+            <div class="table-wrapper border-0 mt-4">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Vehicle Model</th>
+                    <th>Registration</th>
+                    <th>Total Distance (km)</th>
+                    <th>Total Fuel (Liters)</th>
+                    <th>Efficiency (km/L)</th>
+                    <th>Trip Count</th>
+                  </tr>
+                </thead>
+                <tbody id="efficiency-table-body">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Operational Cost & ROI Report -->
+          <div class="col-span-12 card p-0" id="cost-report-card">
+            <div class="card-header p-5 pb-0 border-b-0">
+              <h3 class="card-title">Per-Vehicle Operational Cost & ROI</h3>
+            </div>
+            <div class="table-wrapper border-0 mt-4">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Vehicle</th>
+                    <th>Registration</th>
+                    <th>Maintenance Cost</th>
+                    <th>Fuel Cost</th>
+                    <th>Other Expenses</th>
+                    <th>Total Cost</th>
+                    <th>Generated Revenue</th>
+                    <th>Net Profit</th>
+                  </tr>
+                </thead>
+                <tbody id="cost-table-body">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/reports.js"></script>
+</body>
+</html>

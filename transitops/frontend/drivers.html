@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drivers | TransitOps</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    
+    <div class="main-content">
+      <header class="app-header">
+        <div class="header-title">Driver Management</div>
+        <div class="header-actions">
+          <button class="btn btn-primary" onclick="modal.open('driver-modal')" id="btn-add-driver">+ Register Driver</button>
+        </div>
+      </header>
+
+      <main class="page-content">
+        <div class="filter-bar">
+          <div class="search-input-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-input" class="form-input" placeholder="Search by name or license...">
+          </div>
+          <select id="filter-status" class="form-select" style="width: auto;">
+            <option value="">All Statuses</option>
+            <option value="available">Available</option>
+            <option value="on_trip">On Trip</option>
+            <option value="off_duty">Off Duty</option>
+            <option value="suspended">Suspended</option>
+          </select>
+        </div>
+
+        <div class="card p-0">
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Driver Name</th>
+                  <th>License Number</th>
+                  <th>Category</th>
+                  <th>Expiry Date</th>
+                  <th>Safety Score</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="driver-table-body">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Driver Modal -->
+  <div id="driver-modal" class="modal-backdrop hidden">
+    <div class="modal">
+      <h2 class="modal-title">Register Driver</h2>
+      <form id="driver-form">
+        <input type="hidden" id="driver-id">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" id="d-name" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">License Number</label>
+            <input type="text" id="d-license" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">License Category</label>
+            <select id="d-category" class="form-select" required>
+              <option value="A">Class A</option>
+              <option value="B">Class B</option>
+              <option value="C">Class C</option>
+              <option value="D">Class D</option>
+              <option value="E">Class E</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">License Expiry Date</label>
+            <input type="date" id="d-expiry" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Contact Number</label>
+            <input type="text" id="d-contact" class="form-input">
+          </div>
+          <div class="form-group" id="d-score-group">
+            <label class="form-label">Safety Score (0-100)</label>
+            <input type="number" id="d-score" class="form-input" min="0" max="100" value="100">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="modal.close('driver-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Driver</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/drivers.js"></script>
+</body>
+</html>
