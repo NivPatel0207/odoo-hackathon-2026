@@ -1,16 +1,19 @@
 const Vehicle = require('../models/Vehicle');
+const BaseRepository = require('../repositories/baseRepository');
+const BaseService = require('../services/baseService');
+const auditLog = require('../utils/auditLogger');
 
-// @desc    Get all vehicles
+// Instantiate Repository and Service for Vehicle
+const vehicleRepo = new BaseRepository(Vehicle);
+const vehicleService = new BaseService(vehicleRepo);
+
+// @desc    Get all vehicles (with pagination/filtering)
 // @route   GET /api/vehicles
-// @access  Private (all roles)
+// @access  Private
 const getVehicles = async (req, res, next) => {
   try {
-    const { status, type } = req.query;
-    const filter = {};
-    if (status) filter.status = status;
-    if (type) filter.vehicleType = type;
-    const vehicles = await Vehicle.find(filter).sort({ createdAt: -1 });
-    res.json({ success: true, count: vehicles.length, data: vehicles });
+    const result = await vehicleService.getAll(req.query);
+    res.json({ success: true, ...result });
   } catch (err) {
     next(err);
   }
@@ -18,23 +21,24 @@ const getVehicles = async (req, res, next) => {
 
 // @desc    Get single vehicle
 // @route   GET /api/vehicles/:id
-// @access  Private (all roles)
+// @access  Private
 const getVehicle = async (req, res, next) => {
   try {
-    const vehicle = await Vehicle.findById(req.params.id);
-    if (!vehicle) return res.status(404).json({ success: false, message: 'Vehicle not found' });
+    const vehicle = await vehicleService.getById(req.params.id);
     res.json({ success: true, data: vehicle });
   } catch (err) {
+    if (err.message === 'Resource not found') return res.status(404).json({ success: false, message: err.message });
     next(err);
   }
 };
 
 // @desc    Create a vehicle
 // @route   POST /api/vehicles
-// @access  Private (fleet_manager only)
+// @access  Private (Fleet Manager)
 const createVehicle = async (req, res, next) => {
   try {
-    const vehicle = await Vehicle.create(req.body);
+    const vehicle = await vehicleService.create(req.body);
+    await auditLog('CREATE', 'Vehicle', vehicle._id, req.user ? req.user.id : null, req.body);
     res.status(201).json({ success: true, data: vehicle });
   } catch (err) {
     next(err);
@@ -43,28 +47,36 @@ const createVehicle = async (req, res, next) => {
 
 // @desc    Update a vehicle
 // @route   PUT /api/vehicles/:id
-// @access  Private (fleet_manager only)
+// @access  Private (Fleet Manager)
 const updateVehicle = async (req, res, next) => {
   try {
-    const vehicle = await Vehicle.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-    if (!vehicle) return res.status(404).json({ success: false, message: 'Vehicle not found' });
+    const vehicle = await vehicleService.update(req.params.id, req.body);
+    await auditLog('UPDATE', 'Vehicle', vehicle._id, req.user ? req.user.id : null, req.body);
     res.json({ success: true, data: vehicle });
   } catch (err) {
+    if (err.message === 'Resource not found') return res.status(404).json({ success: false, message: err.message });
     next(err);
   }
 };
 
 // @desc    Delete a vehicle
 // @route   DELETE /api/vehicles/:id
-// @access  Private (fleet_manager only)
+// @access  Private (Fleet Manager)
 const deleteVehicle = async (req, res, next) => {
   try {
-    const vehicle = await Vehicle.findByIdAndDelete(req.params.id);
-    if (!vehicle) return res.status(404).json({ success: false, message: 'Vehicle not found' });
-    res.json({ success: true, message: 'Vehicle deleted' });
+    await vehicleService.delete(req.params.id);
+    await auditLog('DELETE', 'Vehicle', req.params.id, req.user ? req.user.id : null, {});
+    res.json({ success: true, message: 'Vehicle removed' });
   } catch (err) {
+    if (err.message === 'Resource not found') return res.status(404).json({ success: false, message: err.message });
     next(err);
   }
 };
 
-module.exports = { getVehicles, getVehicle, createVehicle, updateVehicle, deleteVehicle };
+module.exports = {
+  getVehicles,
+  getVehicle,
+  createVehicle,
+  updateVehicle,
+  deleteVehicle
+};

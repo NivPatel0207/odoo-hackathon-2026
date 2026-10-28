@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payroll & Salaries - TransitOps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    /* ─── Premium Theme-Adaptive Payroll Styling ─── */
+    .payroll-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .payroll-header-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: var(--color-text-primary);
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .payroll-badges-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+
+    /* KPI Stat Grid */
+    .payroll-stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+
+    .payroll-stat-card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .payroll-stat-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--color-border-light);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .payroll-stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--card-accent, var(--color-primary)), transparent);
+    }
+
+    .stat-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .payroll-stat-label,
+    .stat-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-text-secondary);
+    }
+
+    .stat-icon-wrapper {
+      width: 42px;
+      height: 42px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      background: var(--icon-bg, rgba(245, 158, 11, 0.12));
+      color: var(--card-accent, var(--color-primary));
+      border: 1px solid var(--icon-border, rgba(245, 158, 11, 0.25));
+    }
+
+    .payroll-stat-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.85rem;
+      font-weight: 700;
+      line-height: 1.1;
+      color: var(--color-text-primary);
+      margin-bottom: 8px;
+      letter-spacing: -0.03em;
+    }
+
+    .payroll-stat-subtext {
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Segmented Tab Navigation */
+    .tab-nav-wrapper {
+      background: var(--color-bg-input);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-full);
+      padding: 5px;
+      display: inline-flex;
+      gap: 6px;
+      margin-bottom: 24px;
+      max-width: 100%;
+      overflow-x: auto;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .tab-pill-btn {
+      padding: 8px 20px;
+      border-radius: var(--radius-full);
+      font-weight: 600;
+      font-size: 0.88rem;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      white-space: nowrap;
+    }
+
+    .tab-pill-btn:hover {
+      color: var(--color-text-primary);
+      background: var(--color-bg-card);
+    }
+
+    .tab-pill-btn.active {
+      background: var(--color-bg-card);
+      color: var(--color-primary);
+      border-color: var(--color-primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      font-weight: 700;
+    }
+
+    .tab-pill-count {
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: var(--color-border);
+      color: var(--color-text-secondary);
+    }
+
+    .tab-pill-btn.active .tab-pill-count {
+      background: var(--color-primary);
+      color: #000;
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Filter & Search Toolbar */
+    .table-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-border);
+      flex-wrap: wrap;
+      background: var(--color-bg-card);
+    }
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      min-width: 280px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar-search {
+      position: relative;
+      flex: 1;
+      min-width: 240px;
+      max-width: 380px;
+    }
+
+    .toolbar-search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--color-text-muted);
+      font-size: 0.9rem;
+      pointer-events: none;
+    }
+
+    .toolbar-search input {
+      padding-left: 36px;
+      padding-right: 14px;
+      height: 38px;
+      background: var(--color-bg-input);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      color: var(--color-text-primary);
+      font-size: 0.85rem;
+      width: 100%;
+      transition: all 0.2s;
+    }
+
+    .toolbar-search input:focus {
+      border-color: var(--color-primary);
+      background: var(--color-bg-card);
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+      outline: none;
+    }
+
+    .toolbar-filter-chips {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filter-chip {
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: var(--color-bg-input);
+      border: 1px solid var(--color-border);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .filter-chip:hover {
+      background: var(--color-bg-card-hover);
+      color: var(--color-text-primary);
+      border-color: var(--color-border-light);
+    }
+
+    .filter-chip.active {
+      background: rgba(245, 158, 11, 0.12);
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+      font-weight: 700;
+    }
+
+    /* Interactive Table Headers */
+    .data-table thead tr {
+      background: var(--color-bg-input);
+    }
+
+    .data-table th {
+      padding: 14px 16px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-text-secondary);
+      border-bottom: 2px solid var(--color-border);
+    }
+
+    .sortable-th {
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .sortable-th:hover {
+      color: var(--color-primary);
+    }
+
+    .sort-indicator {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 6px;
+      font-size: 0.75rem;
+      opacity: 0.45;
+      transition: all 0.15s ease;
+    }
+
+    .sortable-th:hover .sort-indicator {
+      opacity: 1;
+      color: var(--color-primary);
+    }
+
+    .sortable-th.sorted-asc .sort-indicator,
+    .sortable-th.sorted-desc .sort-indicator {
+      opacity: 1;
+      color: var(--color-primary);
+      font-weight: bold;
+    }
+
+    .data-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--color-border);
+      vertical-align: middle;
+    }
+
+    .data-table tbody tr:hover {
+      background: var(--color-bg-card-hover);
+    }
+
+    /* Recipient Avatar Initials */
+    .recipient-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .recipient-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    .avatar-driver {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #ffffff;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    .avatar-staff {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: #ffffff;
+      border: 1px solid rgba(59, 130, 246, 0.4);
+    }
+
+    .recipient-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      font-size: 0.94rem;
+    }
+
+    .recipient-subtitle {
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    /* Status Pill Chips */
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .status-chip-pending {
+      background: rgba(245, 158, 11, 0.12);
+      color: #d97706;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .status-chip-settled {
+      background: rgba(16, 185, 129, 0.12);
+      color: #059669;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-chip-neutral {
+      background: rgba(107, 114, 128, 0.12);
+      color: var(--color-text-muted);
+      border: 1px solid var(--color-border);
+    }
+
+    html[data-theme="dark"] .status-chip-pending {
+      color: #fbbf24;
+    }
+
+    html[data-theme="dark"] .status-chip-settled {
+      color: #34d399;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: var(--radius-full);
+      background: currentColor;
+    }
+
+    .status-chip-pending .status-dot {
+      box-shadow: 0 0 8px currentColor;
+      animation: pulseDot 1.8s infinite;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* Monospace Amount display */
+    .amount-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .amount-pending {
+      color: #d97706;
+    }
+
+    html[data-theme="dark"] .amount-pending {
+      color: var(--color-warning);
+    }
+
+    .amount-settled {
+      color: #059669;
+    }
+
+    html[data-theme="dark"] .amount-settled {
+      color: var(--color-success);
+    }
+
+    /* Live Calculator Box in Modal */
+    .live-calc-box {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      margin: 18px 0;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .live-calc-amount {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #059669;
+      letter-spacing: -0.03em;
+      margin: 4px 0;
+    }
+
+    html[data-theme="dark"] .live-calc-amount {
+      color: #34d399;
+      text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+    }
+
+    .calc-breakdown-chips {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 8px;
+      font-size: 0.78rem;
+      color: var(--color-text-secondary);
+      flex-wrap: wrap;
+    }
+
+    .calc-chip {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      padding: 3px 10px;
+      border-radius: var(--radius-sm);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+    }
+
+    /* Payslip Voucher Styling */
+    .voucher-cert {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      position: relative;
+      box-shadow: var(--shadow-md);
+    }
+
+    .voucher-watermark {
+      position: absolute;
+      right: 24px;
+      bottom: 24px;
+      opacity: 0.04;
+      font-size: 7rem;
+      font-weight: 900;
+      font-family: 'Outfit', sans-serif;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* ─── Solvency & Profit-Lock Banner ─── */
+    .solvency-banner-card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 22px 24px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+      transition: all 0.25s ease;
+    }
+
+    .solvency-banner-card.status-surplus {
+      border-color: rgba(16, 185, 129, 0.35);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.04) 0%, var(--color-bg-card) 100%);
+    }
+
+    .solvency-banner-card.status-tight {
+      border-color: rgba(245, 158, 11, 0.4);
+      background: linear-gradient(180deg, rgba(245, 158, 11, 0.04) 0%, var(--color-bg-card) 100%);
+    }
+
+    .solvency-banner-card.status-deficit {
+      border-color: rgba(239, 68, 68, 0.4);
+      background: linear-gradient(180deg, rgba(239, 68, 68, 0.04) 0%, var(--color-bg-card) 100%);
+    }
+
+    .solvency-banner-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .solvency-title-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .solvency-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+
+    .solvency-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      letter-spacing: -0.01em;
+    }
+
+    .solvency-subtitle {
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+      margin-top: 2px;
+    }
+
+    .solvency-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .solvency-badge.badge-surplus {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+
+    .solvency-badge.badge-tight {
+      background: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+
+    .solvency-badge.badge-deficit {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+
+    .solvency-pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 8px currentColor;
+      animation: pulseAnim 2s infinite ease-in-out;
+    }
+
+    @keyframes pulseAnim {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .solvency-metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      background: rgba(0, 0, 0, 0.12);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .solvency-metric-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .solvency-metric-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--color-text-secondary);
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+
+    .solvency-metric-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      letter-spacing: -0.02em;
+    }
+
+    .solvency-metric-sub {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      margin-top: 3px;
+    }
+
+    .solvency-progress-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .solvency-progress-bar {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.4s ease;
+      background: linear-gradient(90deg, #10b981, #059669);
+    }
+
+    .solvency-alert-footer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+      line-height: 1.4;
+      padding-top: 6px;
+    }
+
+    /* Modal Deficit Warning Box */
+    .modal-solvency-warning {
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      margin-bottom: 18px;
+    }
+
+    .modal-solvency-warning.danger {
+      background: rgba(239, 68, 68, 0.08);
+      border-color: rgba(239, 68, 68, 0.35);
+    }
+
+    .modal-solvency-warning .warning-title {
+      font-weight: 700;
+      font-size: 0.88rem;
+      color: #f59e0b;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .modal-solvency-warning.danger .warning-title {
+      color: #ef4444;
+    }
+
+    .modal-solvency-warning .warning-desc {
+      font-size: 0.8rem;
+      color: var(--color-text-secondary);
+      line-height: 1.4;
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #payslip-modal, #payslip-modal * {
+        visibility: visible;
+      }
+      #payslip-modal {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: white !important;
+        color: black !important;
+      }
+      .modal-footer {
+        display: none !important;
+      }
+      .voucher-cert {
+        background: white !important;
+        color: black !important;
+        border: 2px solid #000 !important;
+        box-shadow: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <!-- Injected by auth.js -->
+    </aside>
+
+    <div class="main-content">
+      <!-- Header -->
+      <header class="app-header">
+        <div class="header-left">
+          <div class="payroll-header-title">
+            <span>💳 Payroll & Salaries</span>
+          </div>
+          <div class="payroll-badges-row">
+            <span class="pill pill-primary" style="font-size: 0.72rem;">OPERATIONS RECONCILIATION</span>
+            <span class="text-muted" style="font-size: 0.82rem;">• Direct Salary Disbursal & Driver Trip Settlement Engine</span>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-secondary" onclick="exportPayrollHistory()" title="Download CSV ledger export">
+            <span>📥 Export CSV</span>
+          </button>
+          <button class="btn btn-primary" onclick="triggerBatchPayroll()" title="Disburse all pending salaries and settlements at once">
+            <span>⚡ Disburse All Pending</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="page-content">
+        <!-- KPI Metrics Grid -->
+        <div class="payroll-stat-grid">
+          <!-- Card 1: Paid This Month -->
+          <div class="payroll-stat-card" style="--card-accent: #10b981; --icon-bg: rgba(16, 185, 129, 0.12); --icon-border: rgba(16, 185, 129, 0.25);">
+            <div class="stat-card-top">
+              <span class="stat-label">Paid This Month</span>
+              <div class="stat-icon-wrapper">💳</div>
+            </div>
+            <div class="payroll-stat-value" id="kpi-this-month">₹0.00</div>
+            <div class="payroll-stat-subtext">
+              <span class="badge-success badge">Current Cycle</span>
+              <span>Total disbursed</span>
+            </div>
+          </div>
+
+          <!-- Card 2: Pending Payouts -->
+          <div class="payroll-stat-card" style="--card-accent: #f59e0b; --icon-bg: rgba(245, 158, 11, 0.12); --icon-border: rgba(245, 158, 11, 0.25);">
+            <div class="stat-card-top">
+              <span class="stat-label">Pending Payouts</span>
+              <div class="stat-icon-wrapper">⏳</div>
+            </div>
+            <div class="payroll-stat-value" id="kpi-pending-total" style="color: var(--color-warning);">₹0.00</div>
+            <div class="payroll-stat-subtext">
+              <span class="badge-warning badge" id="kpi-pending-badge">Pending</span>
+              <span id="kpi-pending-subtext">0 staff & 0 drivers pending</span>
+            </div>
+          </div>
+
+          <!-- Card 3: Salaried Members -->
+          <div class="payroll-stat-card" style="--card-accent: #3b82f6; --icon-bg: rgba(59, 130, 246, 0.12); --icon-border: rgba(59, 130, 246, 0.25);">
+            <div class="stat-card-top">
+              <span class="stat-label">Salaried Members</span>
+              <div class="stat-icon-wrapper">👥</div>
+            </div>
+            <div class="payroll-stat-value" id="kpi-total-members">0</div>
+            <div class="payroll-stat-subtext">
+              <span class="badge-info badge">Headcount</span>
+              <span>Active drivers & staff</span>
+            </div>
+          </div>
+
+          <!-- Card 4: All-Time Disbursed -->
+          <div class="payroll-stat-card" style="--card-accent: #8b5cf6; --icon-bg: rgba(139, 92, 246, 0.12); --icon-border: rgba(139, 92, 246, 0.25);">
+            <div class="stat-card-top">
+              <span class="stat-label">All-Time Disbursed</span>
+              <div class="stat-icon-wrapper">📜</div>
+            </div>
+            <div class="payroll-stat-value" id="kpi-all-time">₹0.00</div>
+            <div class="payroll-stat-subtext">
+              <span class="badge-info badge">Audited</span>
+              <span>Lifetime payroll ledger</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Company Solvency & Liquidity Banner -->
+        <div id="solvency-banner" class="solvency-banner-card status-tight">
+          <div class="solvency-banner-header">
+            <div class="solvency-title-group">
+              <div class="solvency-icon" id="solvency-icon">🏦</div>
+              <div>
+                <div class="solvency-title">Operational Solvency & Profit-Lock Engine</div>
+                <div class="solvency-subtitle">Live Operational Financials • Salary Disbursal Governed by Net Trip Profitability</div>
+              </div>
+            </div>
+            <div id="solvency-status-badge" class="solvency-badge badge-tight">
+              <span class="solvency-pulse"></span>
+              <span id="solvency-status-text">CALCULATING SOLVENCY...</span>
+            </div>
+          </div>
+
+          <div class="solvency-metrics-grid">
+            <div class="solvency-metric-item">
+              <div class="solvency-metric-label">Completed Trip Revenue</div>
+              <div class="solvency-metric-val" id="solvency-revenue">₹0.00</div>
+              <div class="solvency-metric-sub">From delivered trips</div>
+            </div>
+            <div class="solvency-metric-item">
+              <div class="solvency-metric-label">Operational Costs</div>
+              <div class="solvency-metric-val" id="solvency-costs" style="color: var(--color-danger);">₹0.00</div>
+              <div class="solvency-metric-sub">Fuel + Expenses + Maint</div>
+            </div>
+            <div class="solvency-metric-item">
+              <div class="solvency-metric-label">Net Operational Profit</div>
+              <div class="solvency-metric-val" id="solvency-profit" style="color: var(--color-success);">₹0.00</div>
+              <div class="solvency-metric-sub" id="solvency-profit-sub">Available profit pool</div>
+            </div>
+            <div class="solvency-metric-item">
+              <div class="solvency-metric-label">Payroll Profit Coverage</div>
+              <div class="solvency-metric-val" id="solvency-coverage">0%</div>
+              <div class="solvency-progress-track">
+                <div class="solvency-progress-bar" id="solvency-progress-bar" style="width: 0%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="solvency-alert-footer" id="solvency-alert-footer">
+            <span class="solvency-footer-icon">ℹ️</span>
+            <span id="solvency-footer-msg">Loading company solvency policy rules...</span>
+          </div>
+        </div>
+
+        <!-- Segmented Tab Navigation -->
+        <div class="tab-nav-wrapper">
+          <button class="tab-pill-btn active" onclick="switchTab('drivers')" id="tab-btn-drivers">
+            <span>👨‍✈️ Driver Settlements</span>
+            <span class="tab-pill-count" id="count-drivers-pending">0</span>
+          </button>
+          <button class="tab-pill-btn" onclick="switchTab('staff')" id="tab-btn-staff">
+            <span>👥 Staff Salaries</span>
+            <span class="tab-pill-count" id="count-staff-pending">0</span>
+          </button>
+          <button class="tab-pill-btn" onclick="switchTab('history')" id="tab-btn-history">
+            <span>📜 Payout Ledger & History</span>
+          </button>
+        </div>
+
+        <!-- TAB 1: Drivers Roster -->
+        <div class="tab-content active" id="tab-drivers">
+          <div class="card p-0" style="overflow: hidden; border: 1px solid var(--color-border);">
+            <!-- Toolbar -->
+            <div class="table-toolbar">
+              <div class="toolbar-left">
+                <div class="toolbar-search">
+                  <span class="toolbar-search-icon">🔍</span>
+                  <input type="text" id="search-drivers" placeholder="Search driver name, phone, or license..." oninput="handleDriverSearch()">
+                </div>
+                <div class="toolbar-filter-chips">
+                  <button class="filter-chip active" id="filter-drv-all" onclick="setDriverStatusFilter('all')">
+                    All Drivers (<span id="count-drv-filter-all">0</span>)
+                  </button>
+                  <button class="filter-chip" id="filter-drv-pending" onclick="setDriverStatusFilter('pending')">
+                    Pending Payouts (<span id="count-drv-filter-pending">0</span>)
+                  </button>
+                  <button class="filter-chip" id="filter-drv-settled" onclick="setDriverStatusFilter('settled')">
+                    Settled
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Table Wrapper -->
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th class="sortable-th" onclick="handleSortDrivers('name')">
+                      Driver Details <span class="sort-indicator" id="sort-drv-name">⇅</span>
+                    </th>
+                    <th class="sortable-th" onclick="handleSortDrivers('paymentType')">
+                      Model <span class="sort-indicator" id="sort-drv-paymentType">⇅</span>
+                    </th>
+                    <th class="sortable-th" onclick="handleSortDrivers('pendingTripsCount')">
+                      Unsettled Trips <span class="sort-indicator" id="sort-drv-pendingTripsCount">⇅</span>
+                    </th>
+                    <th class="sortable-th" onclick="handleSortDrivers('pendingAmount')">
+                      Pending Pay <span class="sort-indicator" id="sort-drv-pendingAmount">⇅</span>
+                    </th>
+                    <th class="sortable-th" onclick="handleSortDrivers('status')">
+                      Status <span class="sort-indicator" id="sort-drv-status">⇅</span>
+                    </th>
+                    <th class="sortable-th" onclick="handleSortDrivers('lastPaidAt')">
+                      Last Payout <span class="sort-indicator" id="sort-drv-lastPaidAt">⇅</span>
+                    </th>
+                    <th style="text-align: right;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="drivers-table-body">
+                  <tr><td colspan="7" class="text-center py-8 text-muted">Loading driver roster...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: Staff Roster -->
+        <div class="tab-content" id="tab-staff">
+          <div class="card p-0" style="overflow: hidden; border: 1px solid var(--color-border);">
+            <!-- Toolbar -->
+            <div class="table-toolbar">
+              <div class="toolbar-left">
+                <div class="toolbar-search">
+                  <span class="toolbar-search-icon">🔍</span>
+                  <input type="text" id="search-staff" placeholder="Search staff name, email, or department..." oninput="handleStaffSearch()">
+                </div>
+                <div class="toolbar-filter-chips">
+                  <button class="filter-chip active" id="filter-stf-all" onclick="setStaffStatusFilter('all')">
+                    All Staff (<span id="count-stf-filter-all">0</span>)
+                  </button>
+                  <button class="filter-chip" id="filter-stf-pending" onclick="setStaffStatusFilter('pending')">
+                    Pending Salaries (<span id="count-stf-filter-pending">0</span>)
+                  </button>
+                  <button class="filter-chip" id="filter-stf-paid" onclick="setStaffStatusFilter('paid')">
+                    Paid This Month
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Table Wrapper -->
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th class="sortable-th" onclick="handleSortStaff('name')">
+                      Team Member <span class="sort-indicator" id="sort-stf-name">⇅</span>
+                    </th>
+                    <th class="sortable-th" onclick="handleSortStaff('role')">
+                      Role <span class="sort-indicator" id="sort-stf-role">⇅</span>
+                    </th>
+                    <th class="sortable-th" onclick="handleSortStaff('department')">
+                      Department <span class="sort-indicator" id="sort-stf-department">⇅</span>
+                    </th>
+                    <th class="sortable-th" onclick="handleSortStaff('baseSalary')">
+                      Base Salary <span class="sort-indicator" id="sort-stf-baseSalary">⇅</span>
+                    </th>
+                    <th class="sortable-th" onclick="handleSortStaff('status')">
+                      Month Status <span class="sort-indicator" id="sort-stf-status">⇅</span>
+                    </th>
+                    <th class="sortable-th" onclick="handleSortStaff('lastPaidAt')">
+                      Last Payout <span class="sort-indicator" id="sort-stf-lastPaidAt">⇅</span>
+                    </th>
+                    <th style="text-align: right;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="staff-table-body">
+                  <tr><td colspan="7" class="text-center py-8 text-muted">Loading staff roster...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: History Ledger -->
+        <div class="tab-content" id="tab-history">
+          <div class="card p-0" style="overflow: hidden; border: 1px solid var(--color-border);">
+            <!-- Toolbar -->
+            <div class="table-toolbar">
+              <div class="toolbar-left">
+                <div class="toolbar-search">
+                  <span class="toolbar-search-icon">🔍</span>
+                  <input type="text" id="search-history" placeholder="Search by recipient or txn ref..." oninput="handleHistorySearch()">
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <select id="filter-history-type" class="form-select" onchange="loadPayrollHistory()" style="width: 170px; height: 38px;">
+                    <option value="">All Beneficiaries</option>
+                    <option value="driver">Drivers Only</option>
+                    <option value="staff">Staff Only</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Table Wrapper -->
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th class="sortable-th" onclick="handleSortHistory('paidAt')">
+                      Disbursement Date <span class="sort-indicator" id="sort-hist-paidAt">⇅</span>
+                    </th>
+                    <th class="sortable-th" onclick="handleSortHistory('beneficiaryName')">
+                      Recipient <span class="sort-indicator" id="sort-hist-beneficiaryName">⇅</span>
+                    </th>
+                    <th class="sortable-th" onclick="handleSortHistory('role')">
+                      Role / Type <span class="sort-indicator" id="sort-hist-role">⇅</span>
+                    </th>
+                    <th class="sortable-th" onclick="handleSortHistory('paymentMethod')">
+                      Payment Mode <span class="sort-indicator" id="sort-hist-paymentMethod">⇅</span>
+                    </th>
+                    <th class="sortable-th" onclick="handleSortHistory('basePay')">
+                      Base Pay <span class="sort-indicator" id="sort-hist-basePay">⇅</span>
+                    </th>
+                    <th class="sortable-th" onclick="handleSortHistory('netPay')">
+                      Net Disbursed <span class="sort-indicator" id="sort-hist-netPay">⇅</span>
+                    </th>
+                    <th class="sortable-th" onclick="handleSortHistory('transactionRef')">
+                      Reference <span class="sort-indicator" id="sort-hist-transactionRef">⇅</span>
+                    </th>
+                    <th style="text-align: right;">Payslip</th>
+                  </tr>
+                </thead>
+                <tbody id="history-table-body">
+                  <tr><td colspan="8" class="text-center py-8 text-muted">Loading payout ledger...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Payout Disbursement Modal -->
+  <div id="payout-modal" class="modal-backdrop hidden">
+    <div class="modal" style="max-width: 620px; width: 92%;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--color-border); padding-bottom: 14px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 36px; height: 36px; border-radius: var(--radius-md); background: rgba(245, 158, 11, 0.15); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+            💰
+          </div>
+          <div>
+            <h2 class="modal-title" id="payout-modal-title" style="margin: 0; font-size: 1.25rem;">Disburse Payment</h2>
+            <div style="font-size: 0.78rem; color: var(--color-text-muted);">Execute atomic payroll disbursement with live reconciliation</div>
+          </div>
+        </div>
+        <button type="button" class="btn-ghost" onclick="modal.close('payout-modal')" style="font-size: 1.25rem; border: none;">✕</button>
+      </div>
+
+      <form id="payout-form" onsubmit="handlePayoutSubmit(event)">
+        <input type="hidden" id="p-member-id">
+        <input type="hidden" id="p-beneficiary-type">
+
+        <!-- Recipient Card -->
+        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+          <div class="recipient-cell">
+            <div class="recipient-avatar avatar-driver" id="p-avatar">JD</div>
+            <div>
+              <div style="font-size: 0.72rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.05em;">BENEFICIARY</div>
+              <div style="font-size: 1.15rem; font-weight: 700; color: var(--color-text-primary);" id="p-recipient-name">--</div>
+              <div style="font-size: 0.82rem; color: var(--color-text-muted); margin-top: 2px;" id="p-recipient-meta">--</div>
+            </div>
+          </div>
+          <span class="pill pill-primary" id="p-recipient-role">--</span>
+        </div>
+
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+          <div class="form-group">
+            <label class="form-label">Base Compensation (₹)</label>
+            <input type="number" id="p-base-pay" class="form-input" min="0" required oninput="recalculateNetPay()" style="font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 600;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Incentives / Bonus (+) (₹)</label>
+            <input type="number" id="p-bonus" class="form-input" min="0" value="0" oninput="recalculateNetPay()" style="font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: var(--color-success);">
+          </div>
+        </div>
+
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+          <div class="form-group">
+            <label class="form-label">Deductions (-) (₹)</label>
+            <input type="number" id="p-deductions" class="form-input" min="0" value="0" oninput="recalculateNetPay()" style="font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: var(--color-danger);">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Payment Mode</label>
+            <select id="p-payment-method" class="form-select" required>
+              <option value="bank_transfer" selected>🏛️ Direct Bank Transfer (NEFT/RTGS)</option>
+              <option value="upi">⚡ UPI Instant Pay</option>
+              <option value="cash">💵 Cash in Hand Voucher</option>
+              <option value="cheque">📜 Company Cheque</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Live Net Pay Display -->
+        <div class="live-calc-box">
+          <div style="font-size: 0.78rem; text-transform: uppercase; color: var(--color-text-muted); letter-spacing: 0.08em; font-weight: 600;">
+            NET DISBURSED AMOUNT
+          </div>
+          <div class="live-calc-amount" id="p-net-pay-display">₹0.00</div>
+          <div class="calc-breakdown-chips">
+            <span class="calc-chip" id="p-chip-base">Base: ₹0</span>
+            <span class="calc-chip" style="color: var(--color-success);" id="p-chip-bonus">+ Bonus: ₹0</span>
+            <span class="calc-chip" style="color: var(--color-danger);" id="p-chip-deductions">- Deductions: ₹0</span>
+          </div>
+        </div>
+
+        <!-- Deficit Alert inside Payout Modal -->
+        <div id="p-solvency-warning" class="modal-solvency-warning hidden">
+          <div class="warning-title">
+            <span>⚠️</span>
+            <span id="p-solvency-warning-title">Executive Deficit Draw Required</span>
+          </div>
+          <div class="warning-desc" id="p-solvency-warning-desc">
+            This payout exceeds available net operational profit. A Fleet Manager authorization and justification is required.
+          </div>
+          
+          <div class="deficit-override-inputs" id="p-deficit-override-section" style="margin-top: 12px; border-top: 1px dashed rgba(245, 158, 11, 0.3); padding-top: 10px;">
+            <label style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer;">
+              <input type="checkbox" id="p-deficit-confirm" onchange="toggleDeficitSubmitState()" style="margin-top: 3px;">
+              <span style="font-size: 0.82rem; font-weight: 600; color: var(--color-text-primary);">
+                Authorize Executive Deficit Draw from company auxiliary capital reserves
+              </span>
+            </label>
+            <div class="form-group" style="margin-top: 8px; margin-bottom: 0;">
+              <label class="form-label" style="font-size: 0.75rem; font-weight: 700; color: #f59e0b;">Executive Justification (Minimum 10 chars) *</label>
+              <input type="text" id="p-deficit-reason" class="form-input" placeholder="e.g. Approved draw from working capital credit line for monthly payroll" oninput="toggleDeficitSubmitState()" style="font-size: 0.85rem;">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label class="form-label">Transaction Reference / UTR Number</label>
+          <input type="text" id="p-transaction-ref" class="form-input" placeholder="e.g. UTR1029384756 or TXN-9988" style="font-family: 'JetBrains Mono', monospace;">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 24px;">
+          <label class="form-label">Audit Notes & Remarks</label>
+          <input type="text" id="p-notes" class="form-input" placeholder="e.g. Regular monthly payroll disbursement">
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 12px;">
+          <button type="button" class="btn btn-ghost" onclick="modal.close('payout-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-payout">
+            <span>✓ Confirm & Disburse Payout</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Executive Batch Deficit Modal -->
+  <div id="deficit-override-modal" class="modal-backdrop hidden">
+    <div class="modal" style="max-width: 580px; width: 92%;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid var(--color-border); padding-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 38px; height: 38px; border-radius: var(--radius-md); background: rgba(239, 68, 68, 0.15); color: var(--color-danger); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+            ⚠️
+          </div>
+          <div>
+            <h2 class="modal-title" style="margin: 0; font-size: 1.25rem; color: var(--color-danger);">Executive Deficit Draw Authorization</h2>
+            <div style="font-size: 0.78rem; color: var(--color-text-muted);">Solvency Policy Enforcement • Fleet Manager Authorization</div>
+          </div>
+        </div>
+        <button type="button" class="btn-ghost" onclick="modal.close('deficit-override-modal')" style="font-size: 1.25rem; border: none;">✕</button>
+      </div>
+
+      <div style="background: rgba(239, 68, 68, 0.06); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: var(--radius-md); padding: 16px; margin-bottom: 18px;">
+        <div style="font-size: 0.88rem; color: var(--color-text-primary); line-height: 1.5;" id="batch-deficit-desc">
+          Total pending payroll exceeds current operational net profit.
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 14px; text-align: center;">
+          <div style="background: var(--color-bg-card); padding: 10px; border-radius: 6px; border: 1px solid var(--color-border);">
+            <div style="font-size: 0.7rem; color: var(--color-text-muted); text-transform: uppercase;">Required Pay</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-weight: 700; margin-top: 2px;" id="batch-deficit-required">₹0</div>
+          </div>
+          <div style="background: var(--color-bg-card); padding: 10px; border-radius: 6px; border: 1px solid var(--color-border);">
+            <div style="font-size: 0.7rem; color: var(--color-text-muted); text-transform: uppercase;">Net Profit</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--color-success); margin-top: 2px;" id="batch-deficit-profit">₹0</div>
+          </div>
+          <div style="background: var(--color-bg-card); padding: 10px; border-radius: 6px; border: 1px solid rgba(239, 68, 68, 0.3);">
+            <div style="font-size: 0.7rem; color: var(--color-danger); text-transform: uppercase;">Cash Shortfall</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--color-danger); margin-top: 2px;" id="batch-deficit-shortfall">₹0</div>
+          </div>
+        </div>
+      </div>
+
+      <form id="batch-deficit-form" onsubmit="handleBatchDeficitSubmit(event)">
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+            <input type="checkbox" id="batch-deficit-confirm" required style="margin-top: 3px;">
+            <span style="font-size: 0.85rem; color: var(--color-text-primary); line-height: 1.4;">
+              I certify as Fleet Manager that I am authorizing an Executive Deficit Draw to fund this batch payroll using auxiliary capital / credit reserves.
+            </span>
+          </label>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 20px;">
+          <label class="form-label">Executive Justification (Required, min 10 characters)</label>
+          <textarea id="batch-deficit-reason" class="form-textarea" rows="3" required placeholder="e.g. Authorized draw from revolving operational credit facility to ensure on-time payroll delivery across all drivers and staff." style="font-size: 0.88rem;"></textarea>
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 12px;">
+          <button type="button" class="btn btn-ghost" onclick="modal.close('deficit-override-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none;">
+            <span>⚠️ Authorize & Disburse Batch</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Payslip Voucher Modal -->
+  <div id="payslip-modal" class="modal-backdrop hidden">
+    <div class="modal" style="max-width: 680px; width: 92%;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--color-border); padding-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="font-size: 1.3rem;">📜</div>
+          <h2 class="modal-title" style="margin: 0;">Official Payment Voucher</h2>
+        </div>
+        <button type="button" class="btn-ghost" onclick="modal.close('payslip-modal')" style="font-size: 1.25rem; border: none;">✕</button>
+      </div>
+      <div id="payslip-modal-content">
+        <!-- Rendered by JS -->
+      </div>
+      <div class="modal-footer" style="margin-top: 24px; display: flex; justify-content: space-between; align-items: center;">
+        <button type="button" class="btn btn-secondary" onclick="window.print()">
+          <span>🖨️ Print Voucher</span>
+        </button>
+        <button type="button" class="btn btn-primary" onclick="modal.close('payslip-modal')">
+          <span>Close Window</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config.js" defer></script>
+  <script src="js/store.js" defer></script>
+  <script src="js/utils/debounce.js" defer></script>
+  <script src="js/utils/ui-components.js" defer></script>
+  <script src="js/services/api.js?v=1785872000000" defer></script>
+  <script src="js/services/auth.js?v=1785872000000" defer></script>
+  <script src="js/pages/payroll.js?v=1785872000000" defer></script>
+</body>
+
+</html>

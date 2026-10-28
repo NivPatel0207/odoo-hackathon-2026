@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
+const applyBaseSchema = require('../utils/applyBaseSchema');
 
 const FuelLogSchema = new mongoose.Schema({
+  driver: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Driver',
+    required: [true, 'Driver is required']
+  },
   vehicle: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Vehicle',
@@ -16,12 +22,12 @@ const FuelLogSchema = new mongoose.Schema({
     default: Date.now,
     required: true
   },
-  liters: {
+  quantity: {
     type: Number,
-    required: [true, 'Fuel quantity (liters) is required'],
-    min: [0, 'Liters cannot be negative']
+    required: [true, 'Fuel quantity is required'],
+    min: [0, 'Quantity cannot be negative']
   },
-  costPerLiter: {
+  costPerUnit: {
     type: Number,
     default: 0
   },
@@ -33,7 +39,27 @@ const FuelLogSchema = new mongoose.Schema({
   station: {
     type: String,
     trim: true
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'pending'
+  },
+  approvedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
+  },
+  rejectionReason: {
+    type: String,
+    trim: true
+  },
+  receiptUrl: {
+    type: String,
+    trim: true
   }
 }, { timestamps: true });
+
+applyBaseSchema(FuelLogSchema);
 
 module.exports = mongoose.model('FuelLog', FuelLogSchema);

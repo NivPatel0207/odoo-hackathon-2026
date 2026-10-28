@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dispatch Board | TransitOps</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <!-- SortableJS for Drag and Drop -->
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+  <style>
+    .dispatch-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      height: calc(100vh - 120px);
+      overflow: hidden;
+    }
+
+    .dispatch-pane {
+      background: var(--color-bg-secondary);
+      border-radius: 12px;
+      border: 1px solid var(--color-border);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .pane-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-bg-card);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .pane-header h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge-count {
+      background: rgba(var(--color-primary-rgb), 0.15);
+      color: var(--color-primary);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .pane-content {
+      padding: 16px;
+      overflow-y: auto;
+      flex: 1;
+      background: var(--color-bg-body);
+    }
+
+    /* Load Card */
+    .load-card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+      cursor: grab;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+      position: relative;
+    }
+    
+    .load-card:active {
+      cursor: grabbing;
+    }
+
+    .load-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--color-primary);
+    }
+
+    .load-card.sortable-ghost {
+      opacity: 0.4;
+      background: var(--color-bg-tertiary);
+    }
+
+    .load-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .load-id {
+      font-weight: 700;
+      color: var(--color-primary);
+      font-size: 0.95rem;
+    }
+
+    .load-customer {
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+      margin-top: 2px;
+    }
+
+    .load-rate {
+      font-weight: 600;
+      color: var(--color-success);
+      font-size: 1.1rem;
+    }
+
+    .load-route {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      font-size: 0.9rem;
+      color: var(--color-text-secondary);
+    }
+
+    .route-arrow {
+      color: var(--color-text-muted);
+    }
+
+    .load-details {
+      display: flex;
+      gap: 16px;
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+      padding-top: 12px;
+      border-top: 1px dashed var(--color-border);
+    }
+
+    /* Asset Card */
+    .asset-card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    .asset-header {
+      padding: 12px 16px;
+      background: var(--color-bg-tertiary);
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .asset-icon {
+      width: 32px;
+      height: 32px;
+      background: rgba(var(--color-primary-rgb), 0.15);
+      color: var(--color-primary);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .asset-info {
+      flex: 1;
+    }
+    
+    .asset-name {
+      font-weight: 600;
+      color: var(--color-text-primary);
+      font-size: 0.95rem;
+    }
+
+    .asset-meta {
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+    }
+
+    /* Drop Zone for Loads inside Asset Card */
+    .asset-dropzone {
+      min-height: 80px;
+      padding: 12px;
+      background: rgba(0,0,0,0.02);
+      border: 2px dashed transparent;
+      transition: all 0.2s;
+    }
+
+    .asset-dropzone.drag-over {
+      background: rgba(var(--color-primary-rgb), 0.15);
+      border-color: var(--color-primary);
+    }
+
+    .empty-drop-text {
+      text-align: center;
+      color: var(--color-text-muted);
+      font-size: 0.85rem;
+      padding: 20px 0;
+      pointer-events: none;
+    }
+
+    .asset-dropzone:not(:empty) .empty-drop-text {
+      display: none;
+    }
+    
+    .quick-assign-btn {
+        background: var(--color-primary);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 6px 16px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .quick-assign-btn:hover {
+        background: #2563eb; /* Darker primary */
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    
+    <div class="main-content">
+      <header class="app-header">
+        <div class="header-title">Dispatch Board</div>
+        <div class="flex gap-3">
+          <button class="btn btn-primary" onclick="openCreateLoadModal()">+ New Load</button>
+        </div>
+      </header>
+
+      <main class="page-content" role="main">
+        
+        <!-- KPI Dashboard -->
+        <div class="kpi-dashboard" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
+          <div class="kpi-card" style="background: var(--color-bg-card); padding: 16px; border-radius: 8px; border: 1px solid var(--color-border); display: flex; flex-direction: column;">
+            <span style="color: var(--color-text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Pipeline Revenue</span>
+            <span id="kpi-revenue" style="color: var(--color-success); font-size: 1.5rem; font-weight: 700; margin-top: 8px;">₹0</span>
+          </div>
+          <div class="kpi-card" style="background: var(--color-bg-card); padding: 16px; border-radius: 8px; border: 1px solid var(--color-border); display: flex; flex-direction: column;">
+            <span style="color: var(--color-text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Pending Loads</span>
+            <span id="kpi-loads" style="color: var(--color-text-primary); font-size: 1.5rem; font-weight: 700; margin-top: 8px;">0</span>
+          </div>
+          <div class="kpi-card" style="background: var(--color-bg-card); padding: 16px; border-radius: 8px; border: 1px solid var(--color-border); display: flex; flex-direction: column;">
+            <span style="color: var(--color-text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Idle Assets</span>
+            <span id="kpi-assets" style="color: var(--color-text-primary); font-size: 1.5rem; font-weight: 700; margin-top: 8px;">0</span>
+          </div>
+          <div class="kpi-card" style="background: var(--color-bg-card); padding: 16px; border-radius: 8px; border: 1px solid var(--color-border); display: flex; flex-direction: column;">
+            <span style="color: var(--color-text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Fleet Utilization</span>
+            <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px;">
+              <span id="kpi-utilization" style="color: var(--color-primary); font-size: 1.5rem; font-weight: 700;">0%</span>
+              <div style="flex: 1; height: 6px; background: var(--color-bg-tertiary); border-radius: 3px; overflow: hidden;">
+                <div id="kpi-util-bar" style="height: 100%; width: 0%; background: var(--color-primary); transition: width 0.5s ease;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dispatch-container">
+          
+          <!-- Unassigned Loads Pane -->
+          <div class="dispatch-pane">
+            <div class="pane-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+              <h3 style="margin: 0;">Available Loads <span class="badge-count" id="unassigned-count">0</span></h3>
+              <div style="position: relative; max-width: 250px; width: 100%;">
+                <input type="text" id="load-search" placeholder="Search city or customer..." style="width: 100%; padding: 6px 12px 6px 36px; font-size: 0.85rem; height: 36px; background: rgba(255, 255, 255, 0.05); color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; outline: none; transition: all 0.2s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 12px; top: 10px; pointer-events: none;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              </div>
+            </div>
+            <div class="pane-content" id="unassigned-loads-list">
+              <!-- Rendered by JS -->
+              <div style="text-align: center; padding: 40px; color: var(--color-text-muted);">Loading loads...</div>
+            </div>
+          </div>
+
+          <!-- Available Assets Pane -->
+          <div class="dispatch-pane">
+            <div class="pane-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+              <h3 style="margin: 0;">Available Assets <span class="badge-count" id="assets-count">0</span></h3>
+              <select id="asset-filter" class="form-select" style="max-width: 150px; font-size: 0.85rem; height: 32px; padding: 4px 28px 4px 8px;">
+                <option value="all">All Types</option>
+                <option value="truck">Trucks</option>
+                <option value="trailer">Trailers</option>
+                <option value="van">Vans</option>
+              </select>
+            </div>
+            <div class="pane-content" id="available-assets-list">
+              <!-- Rendered by JS -->
+               <div style="text-align: center; padding: 40px; color: var(--color-text-muted);">Loading assets...</div>
+            </div>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Quick Assign Modal -->
+  <div id="assign-modal" class="modal-backdrop hidden">
+    <div class="modal" style="max-width: 500px;">
+      <h2 class="modal-title">Assign Load <span id="assign-load-id" class="text-primary"></span></h2>
+      <form id="assign-form">
+        <input type="hidden" id="a-load-id">
+        <div class="form-group">
+          <label class="form-label">Select Asset (Truck & Driver Combo)</label>
+          <select id="a-asset-select" class="form-select" required>
+              <!-- Populated by JS -->
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="modal.close('assign-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Assign Load</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Create Load Modal -->
+  <div id="load-modal" class="modal-backdrop hidden">
+    <div class="modal" style="max-width: 700px; width: 90%;">
+      <h2 class="modal-title">New Freight Load</h2>
+      <form id="load-form">
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label class="form-label">Customer / Broker Name</label>
+            <input type="text" id="l-customer" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Pickup Location</label>
+            <input type="text" id="l-source" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Delivery Location</label>
+            <input type="text" id="l-destination" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Commodity Type</label>
+            <input type="text" id="l-commodity" class="form-input" placeholder="e.g. Produce, Electronics">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cargo Weight (kg)</label>
+            <input type="number" id="l-weight" class="form-input" min="0" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Rate Type</label>
+            <select id="l-rate-type" class="form-select">
+              <option value="flat">Flat Rate</option>
+              <option value="per_mile">Per Mile / Km</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Rate Amount (₹)</label>
+            <input type="number" id="l-rate" class="form-input" min="0" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Estimated Distance (km)</label>
+            <input type="number" id="l-distance" class="form-input" min="0" placeholder="Required for per-mile calc">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Total Revenue (₹)</label>
+            <div style="display: flex; gap: 8px;">
+                <input type="number" id="l-revenue" class="form-input" min="0" style="flex: 1;">
+                <button type="button" class="btn btn-ghost" onclick="calculateRevenue()" style="border: 1px solid var(--color-border);" title="Auto Calculate">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
+                </button>
+            </div>
+            <small class="text-muted mt-1" style="display: block; font-size: 0.75rem;">Can be auto-calculated or manually entered.</small>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Priority</label>
+            <select id="l-priority" class="form-select" required>
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+              <option value="urgent">Urgent</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">ETA (Optional for Draft)</label>
+            <input type="datetime-local" id="l-eta" class="form-input">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="modal.close('load-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Load</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/config.js" defer></script>
+  <script src="js/store.js" defer></script>
+  <script src="js/utils/ui-components.js" defer></script>
+  <script src="js/services/api.js" defer></script>
+  <script src="js/services/auth.js" defer></script>
+  <script src="js/pages/dispatch.js" defer></script>
+</body>
+</html>

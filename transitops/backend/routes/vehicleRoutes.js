@@ -1,16 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const { getVehicles, getVehicle, createVehicle, updateVehicle, deleteVehicle } = require('../controllers/vehicleController');
-const { protect } = require('../middleware/authMiddleware');
-const { authorize } = require('../middleware/roleMiddleware');
+const { protect, authorize } = require('../middleware/authMiddleware');
+const { cacheMiddleware, clearCache } = require('../middleware/cacheMiddleware');
+const { validateVehicle } = require('../validators/entityValidators');
 
 router.route('/')
-  .get(protect, getVehicles)
-  .post(protect, authorize('fleet_manager'), createVehicle);
+  .get(protect, cacheMiddleware(300), getVehicles)
+  .post(protect, authorize('fleet_manager'), validateVehicle, clearCache('/api/v1/vehicles'), createVehicle);
 
 router.route('/:id')
-  .get(protect, getVehicle)
-  .put(protect, authorize('fleet_manager'), updateVehicle)
-  .delete(protect, authorize('fleet_manager'), deleteVehicle);
+  .get(protect, cacheMiddleware(300), getVehicle)
+  .put(protect, authorize('fleet_manager'), validateVehicle, clearCache('/api/v1/vehicles'), updateVehicle)
+  .delete(protect, authorize('fleet_manager'), clearCache('/api/v1/vehicles'), deleteVehicle);
 
 module.exports = router;

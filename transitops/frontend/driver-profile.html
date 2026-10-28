@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile | TransitOps Driver</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .page-title { font-family: 'Outfit', sans-serif; font-weight: 700; }
+    
+    .premium-card {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .section-header {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--color-text-muted);
+      margin-bottom: 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 12px;
+    }
+
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+    .profile-avatar {
+      width: 80px; height: 80px;
+      background: rgba(var(--color-primary-rgb), 0.2);
+      color: var(--color-primary);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Outfit'; font-size: 2rem; font-weight: 700;
+    }
+    .profile-name { font-family: 'Outfit'; font-size: 1.8rem; font-weight: 700; color: white; margin-bottom: 4px; }
+    .profile-status { color: #10b981; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+
+    .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .data-group { margin-bottom: 16px; }
+    .data-label { color: var(--color-text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+    .data-value { color: white; font-size: 1.1rem; font-weight: 500; font-family: 'JetBrains Mono', monospace; }
+    .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-left: 8px; }
+    .badge-verified { background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+    .badge-pending { background: rgba(245,158,11,0.2); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+
+    .btn-logout {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      padding: 16px 32px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-family: 'Outfit';
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      margin-top: 24px;
+    }
+    .btn-logout:hover { background: #ef4444; color: white; }
+
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main-content">
+      <header class="app-header">
+        <div class="header-left">
+          <h1 class="page-title">My Profile</h1>
+        </div>
+      </header>
+      <main class="page-content">
+
+        <div class="premium-card" style="max-width: 800px; margin: 0 auto;">
+          <div class="profile-header">
+            <div class="profile-avatar" id="prof-avatar">DR</div>
+            <div>
+              <div class="profile-name" id="prof-name">Loading...</div>
+              <div class="profile-status" id="prof-status">Active</div>
+            </div>
+          </div>
+
+          <div class="section-header">Personal Details</div>
+          <div class="data-grid">
+            <div class="data-group">
+              <div class="data-label">Email Address</div>
+              <div class="data-value" id="prof-email" style="font-family: 'Inter', sans-serif;">-</div>
+            </div>
+            <div class="data-group">
+              <div class="data-label">Contact Number</div>
+              <div class="data-value" id="prof-phone">-</div>
+            </div>
+          </div>
+
+          <div class="section-header" style="margin-top: 16px;">License Information</div>
+          <div class="data-grid">
+            <div class="data-group">
+              <div class="data-label">License Number</div>
+              <div class="data-value" id="prof-license">-</div>
+            </div>
+            <div class="data-group">
+              <div class="data-label">Class / Category</div>
+              <div class="data-value" id="prof-class">-</div>
+            </div>
+            <div class="data-group">
+              <div class="data-label">Expiry Date</div>
+              <div class="data-value" id="prof-expiry">-</div>
+            </div>
+          </div>
+
+          <div class="section-header" style="margin-top: 16px;">KYC Information (Encrypted)</div>
+          <div class="data-grid">
+            <div class="data-group">
+              <div class="data-label">Aadhar Number</div>
+              <div class="data-value">
+                <span id="prof-aadhar">---- ---- ----</span>
+                <span id="prof-kyc-badge" class="badge"></span>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-logout" onclick="auth.logout()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            Secure Log Out
+          </button>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="js/config.js" defer></script>
+  <script src="js/store.js" defer></script>
+  <script src="js/utils/ui-components.js" defer></script>
+  <script src="js/services/api.js" defer></script>
+  <script src="js/services/auth.js" defer></script>
+  <script src="js/pages/driver-profile.js" defer></script>
+</body>
+</html>

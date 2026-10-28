@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Trips | TransitOps Driver</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .page-title { font-family: 'Outfit', sans-serif; font-weight: 700; }
+    
+    .premium-card {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 24px 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .section-header {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--color-text-muted);
+      margin-bottom: 24px;
+    }
+
+    .trip-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .trip-item {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      padding: 20px;
+      border-radius: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.2s;
+    }
+
+    .trip-item:hover {
+      background: rgba(255,255,255,0.04);
+    }
+
+    .trip-route {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 4px;
+    }
+
+    .trip-meta {
+      font-size: 0.9rem;
+      color: var(--color-text-muted);
+      display: flex;
+      gap: 12px;
+    }
+
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .btn-primary {
+      background: var(--color-primary);
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: #e6b800; /* Darker primary */
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.15);
+    }
+
+    .active-trip-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .detail-label {
+      color: var(--color-text-muted);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .detail-value {
+      font-size: 1.1rem;
+      color: var(--color-text-primary);
+      font-weight: 500;
+    }
+
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      align-items: center; justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+      background: #111;
+      padding: 32px;
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,0.1);
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .modal-content h2 { margin-top: 0; margin-bottom: 24px; font-family: 'Outfit'; }
+    
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 8px; color: var(--color-text-muted); }
+    .form-group input, .form-group select {
+      width: 100%; padding: 12px; border-radius: 8px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      color: white;
+    }
+    .form-group select option, select option {
+      background-color: #111827;
+      color: #ffffff;
+      padding: 8px 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main-content">
+      <header class="app-header">
+        <div class="header-left">
+          <h1 class="page-title">My Trips</h1>
+        </div>
+      </header>
+      <main class="page-content">
+
+        <!-- Active Trip Section -->
+        <div id="active-trip-container" style="display: none;">
+          <div class="premium-card" style="border-color: rgba(var(--color-primary-rgb), 0.3); box-shadow: 0 10px 40px rgba(var(--color-primary-rgb), 0.1);">
+            <div class="section-header" style="color: var(--color-primary);">Active Trip</div>
+            
+            <div class="active-trip-grid">
+              <div class="detail-item">
+                <div class="detail-label">Route</div>
+                <div class="detail-value" id="at-route">--</div>
+                <div style="font-size: 0.85rem; color: var(--color-text-muted);" id="at-trip-code">--</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Status</div>
+                <div class="detail-value">
+                  <span id="at-status" class="status-badge" style="background: rgba(255,255,255,0.1);">--</span>
+                </div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">ETA / Scheduled</div>
+                <div class="detail-value" id="at-eta">--</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Vehicle</div>
+                <div class="detail-value" id="at-vehicle">--</div>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 16px; margin-top: 32px; flex-wrap: wrap;" id="active-trip-actions">
+              <!-- Dynamically populated buttons -->
+            </div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+          <!-- Upcoming Trips -->
+          <div class="premium-card">
+            <div class="section-header">Upcoming Schedule</div>
+            <div class="trip-list" id="upcoming-trips-list">
+              <div style="text-align: center; color: var(--color-text-muted); padding: 20px;">Loading...</div>
+            </div>
+          </div>
+
+          <!-- History -->
+          <div class="premium-card">
+            <div class="section-header">Recent History</div>
+            <div class="trip-list" id="history-trips-list">
+              <div style="text-align: center; color: var(--color-text-muted); padding: 20px;">Loading...</div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Inspection Modal -->
+  <div class="modal-overlay" id="inspection-modal">
+    <div class="modal-content">
+      <h2>Pre-Trip Inspection</h2>
+      <form id="inspection-form">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+          <label style="display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="insp-brakes"> Brakes OK
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="insp-tyres"> Tyres OK
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="insp-engine"> Engine OK
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="insp-headlights"> Headlights OK
+          </label>
+        </div>
+        <div class="form-group">
+          <label>Overall Condition</label>
+          <select id="insp-condition">
+            <option value="Good">Good (Safe)</option>
+            <option value="Fair">Fair (Safe to drive but needs attention)</option>
+            <option value="Unsafe">Unsafe (Do not drive)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <input type="text" id="insp-notes" placeholder="Optional notes...">
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px;">
+          <button type="button" class="btn-secondary" onclick="document.getElementById('inspection-modal').style.display='none'">Cancel</button>
+          <button type="submit" class="btn-primary">Submit Inspection</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Complete Modal -->
+  <div class="modal-overlay" id="complete-modal">
+    <div class="modal-content">
+      <h2>Complete Trip</h2>
+      <form id="complete-form">
+        <div class="form-group">
+          <label>Actual Distance (km/miles)</label>
+          <input type="number" id="comp-distance" required min="0">
+        </div>
+        <div class="form-group">
+          <label>Fuel Consumed (optional)</label>
+          <input type="number" id="comp-fuel" min="0">
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px;">
+          <button type="button" class="btn-secondary" onclick="document.getElementById('complete-modal').style.display='none'">Cancel</button>
+          <button type="submit" class="btn-primary">Mark Completed</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/config.js" defer></script>
+  <script src="js/store.js" defer></script>
+  <script src="js/utils/ui-components.js" defer></script>
+  <script src="js/services/api.js" defer></script>
+  <script src="js/services/auth.js" defer></script>
+  <script src="js/pages/driver-trips.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      auth.requireAuth(['driver']);
+      nav.render('driver-trips');
+    });
+  </script>
+</body>
+</html>

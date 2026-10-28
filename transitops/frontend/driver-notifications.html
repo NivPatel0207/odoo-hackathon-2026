@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notifications | TransitOps Driver</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .page-title { font-family: 'Outfit', sans-serif; font-weight: 700; }
+    
+    .premium-card {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .notification-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .notification-item {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 20px;
+      padding: 24px;
+      display: flex;
+      gap: 20px;
+      transition: all 0.2s;
+      position: relative;
+    }
+    
+    .notification-item.unread {
+      background: rgba(var(--color-primary-rgb), 0.05);
+      border-color: rgba(var(--color-primary-rgb), 0.3);
+    }
+
+    .notification-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .type-info { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+    .type-warning { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+    .type-error { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+    .type-success { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+
+    .notification-content { flex-grow: 1; }
+    
+    .notification-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    
+    .notification-title {
+      font-family: 'Outfit';
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: white;
+    }
+    
+    .notification-time {
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+      white-space: nowrap;
+    }
+
+    .notification-body {
+      color: #d1d5db;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .btn-read {
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-read:hover { background: rgba(255,255,255,0.2); }
+    .unread-dot {
+      width: 10px; height: 10px;
+      background: var(--color-primary);
+      border-radius: 50%;
+      position: absolute;
+      top: -4px; right: -4px;
+      display: none;
+    }
+    .notification-item.unread .unread-dot { display: block; }
+
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main-content">
+      <header class="app-header">
+        <div class="header-left">
+          <h1 class="page-title">Notifications</h1>
+        </div>
+      </header>
+      <main class="page-content">
+
+        <div class="premium-card">
+          <div class="notification-list" id="notification-list">
+            <div style="text-align: center; color: var(--color-text-muted); padding: 40px;">Loading notifications...</div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="js/config.js" defer></script>
+  <script src="js/store.js" defer></script>
+  <script src="js/utils/ui-components.js" defer></script>
+  <script src="js/services/api.js" defer></script>
+  <script src="js/services/auth.js" defer></script>
+  <script src="js/pages/driver-notifications.js" defer></script>
+</body>
+</html>

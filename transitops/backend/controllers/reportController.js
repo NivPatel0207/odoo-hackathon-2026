@@ -43,29 +43,31 @@ const getDashboardKPIs = async (req, res, next) => {
 
     // Financial KPIs
     const revenueAgg = await Trip.aggregate([
-      { $match: { status: 'completed' } },
-      { $group: { _id: null, totalRevenue: { $sum: '$revenue' }, totalDistance: { $sum: '$actualDistance' }, totalFuel: { $sum: '$fuelConsumed' } } }
+      { $match: { status: 'completed', deleted: { $ne: true } } },
+      { $group: { _id: null, totalRevenue: { $sum: '$revenue' }, totalDistance: { $sum: '$actualDistance' } } }
     ]);
     const fuelCostAgg = await FuelLog.aggregate([
-      { $group: { _id: null, totalFuelCost: { $sum: '$cost' } } }
+      { $match: { deleted: { $ne: true } } },
+      { $group: { _id: null, totalFuelCost: { $sum: '$cost' }, totalFuelQuantity: { $sum: '$quantity' } } }
     ]);
     const expenseCostAgg = await Expense.aggregate([
+      { $match: { deleted: { $ne: true } } },
       { $group: { _id: null, totalExpenses: { $sum: '$amount' } } }
     ]);
     const maintenanceCostAgg = await Maintenance.aggregate([
-      { $match: { status: 'closed' } },
+      { $match: { status: 'closed', deleted: { $ne: true } } },
       { $group: { _id: null, totalMaintCost: { $sum: '$cost' } } }
     ]);
 
     const totalRevenue = revenueAgg[0]?.totalRevenue || 0;
     const totalDistance = revenueAgg[0]?.totalDistance || 0;
-    const totalFuelLiters = revenueAgg[0]?.totalFuel || 0;
+    const totalFuelQuantity = fuelCostAgg[0]?.totalFuelQuantity || 0;
     const totalFuelCost = fuelCostAgg[0]?.totalFuelCost || 0;
     const totalExpenses = expenseCostAgg[0]?.totalExpenses || 0;
     const totalMaintCost = maintenanceCostAgg[0]?.totalMaintCost || 0;
     const totalCosts = totalFuelCost + totalExpenses + totalMaintCost;
     const netProfit = totalRevenue - totalCosts;
-    const fuelEfficiency = totalDistance > 0 && totalFuelLiters > 0 ? (totalDistance / totalFuelLiters).toFixed(2) : 0;
+    const fuelEfficiency = totalDistance > 0 && totalFuelQuantity > 0 ? (totalDistance / totalFuelQuantity).toFixed(2) : 0;
     const roi = totalCosts > 0 ? (((totalRevenue - totalCosts) / totalCosts) * 100).toFixed(2) : 0;
 
     res.json({
@@ -97,23 +99,39 @@ const getDashboardKPIs = async (req, res, next) => {
 // @access  Private (all roles)
 const getFuelEfficiencyReport = async (req, res, next) => {
   try {
-    const report = await Trip.aggregate([
-      { $match: { status: 'completed', actualDistance: { $gt: 0 }, fuelConsumed: { $gt: 0 } } },
-      { $lookup: { from: 'vehicles', localField: 'vehicle', foreignField: '_id', as: 'vehicle' } },
-      { $unwind: '$vehicle' },
-      {
-        $group: {
-          _id: '$vehicle._id',
-          vehicleName: { $first: '$vehicle.name' },
-          regNumber: { $first: '$vehicle.registrationNumber' },
-          totalDistance: { $sum: '$actualDistance' },
-          totalFuel: { $sum: '$fuelConsumed' },
-          tripCount: { $sum: 1 }
-        }
-      },
-      { $addFields: { kmPerLiter: { $divide: ['$totalDistance', '$totalFuel'] } } },
-      { $sort: { kmPerLiter: -1 } }
+    const vehicles = await Vehicle.find({}, 'name registrationNumber fuelType');
+    
+    const [distanceAgg, fuelAgg] = await Promise.all([
+      Trip.aggregate([
+        { $match: { status: 'completed', deleted: { $ne: true } } },
+        { $group: { _id: '$vehicle', totalDistance: { $sum: '$actualDistance' }, tripCount: { $sum: 1 } } }
+      ]),
+      FuelLog.aggregate([
+        { $match: { deleted: { $ne: true } } },
+        { $group: { _id: '$vehicle', totalFuel: { $sum: '$quantity' } } }
+      ])
     ]);
+
+    const distMap = Object.fromEntries(distanceAgg.map(item => [item._id.toString(), { dist: item.totalDistance, count: item.tripCount }]));
+    const fuelMap = Object.fromEntries(fuelAgg.map(item => [item._id.toString(), item.totalFuel]));
+
+    const report = vehicles.map(v => {
+      const distData = distMap[v._id.toString()] || { dist: 0, count: 0 };
+      const totalFuel = fuelMap[v._id.toString()] || 0;
+      return {
+        vehicleId: v._id,
+        vehicleName: v.name,
+        regNumber: v.registrationNumber,
+        fuelType: v.fuelType,
+        totalDistance: distData.dist,
+        totalFuel: totalFuel,
+        tripCount: distData.count,
+        kmPerLiter: totalFuel > 0 ? (distData.dist / totalFuel) : 0
+      };
+    }).filter(v => v.tripCount > 0 || v.totalFuel > 0);
+
+    report.sort((a, b) => b.kmPerLiter - a.kmPerLiter);
+
     res.json({ success: true, data: report });
   } catch (err) {
     next(err);
@@ -126,15 +144,24 @@ const getFuelEfficiencyReport = async (req, res, next) => {
 const getOperationalCostReport = async (req, res, next) => {
   try {
     const vehicles = await Vehicle.find({}, 'name registrationNumber acquisitionCost');
-    const report = await Promise.all(vehicles.map(async (v) => {
-      const fuelCostAgg = await FuelLog.aggregate([{ $match: { vehicle: v._id } }, { $group: { _id: null, total: { $sum: '$cost' } } }]);
-      const expCostAgg = await Expense.aggregate([{ $match: { vehicle: v._id } }, { $group: { _id: null, total: { $sum: '$amount' } } }]);
-      const maintCostAgg = await Maintenance.aggregate([{ $match: { vehicle: v._id, status: 'closed' } }, { $group: { _id: null, total: { $sum: '$cost' } } }]);
-      const revenueAgg = await Trip.aggregate([{ $match: { vehicle: v._id, status: 'completed' } }, { $group: { _id: null, total: { $sum: '$revenue' } } }]);
-      const fuelCost = fuelCostAgg[0]?.total || 0;
-      const expCost = expCostAgg[0]?.total || 0;
-      const maintCost = maintCostAgg[0]?.total || 0;
-      const revenue = revenueAgg[0]?.total || 0;
+    
+    const [fuelCosts, expCosts, maintCosts, revenues] = await Promise.all([
+      FuelLog.aggregate([{ $match: { deleted: { $ne: true } } }, { $group: { _id: '$vehicle', total: { $sum: '$cost' } } }]),
+      Expense.aggregate([{ $match: { deleted: { $ne: true } } }, { $group: { _id: '$vehicle', total: { $sum: '$amount' } } }]),
+      Maintenance.aggregate([{ $match: { status: 'closed', deleted: { $ne: true } } }, { $group: { _id: '$vehicle', total: { $sum: '$cost' } } }]),
+      Trip.aggregate([{ $match: { status: 'completed', deleted: { $ne: true } } }, { $group: { _id: '$vehicle', total: { $sum: '$revenue' } } }])
+    ]);
+
+    const fuelMap = Object.fromEntries(fuelCosts.map(item => [item._id.toString(), item.total]));
+    const expMap = Object.fromEntries(expCosts.map(item => [item._id.toString(), item.total]));
+    const maintMap = Object.fromEntries(maintCosts.map(item => [item._id.toString(), item.total]));
+    const revMap = Object.fromEntries(revenues.map(item => [item._id.toString(), item.total]));
+
+    const report = vehicles.map(v => {
+      const fuelCost = fuelMap[v._id.toString()] || 0;
+      const expCost = expMap[v._id.toString()] || 0;
+      const maintCost = maintMap[v._id.toString()] || 0;
+      const revenue = revMap[v._id.toString()] || 0;
       const totalCost = fuelCost + expCost + maintCost;
       return {
         vehicleId: v._id,
@@ -143,7 +170,39 @@ const getOperationalCostReport = async (req, res, next) => {
         fuelCost, expenseCost: expCost, maintenanceCost: maintCost,
         totalCost, revenue, profit: revenue - totalCost
       };
-    }));
+    });
+    res.json({ success: true, data: report });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Get driver performance report
+// @route   GET /api/reports/driver-performance
+// @access  Private (financial_analyst, fleet_manager)
+const getDriverPerformanceReport = async (req, res, next) => {
+  try {
+    const report = await Trip.aggregate([
+      { $match: { status: 'completed', deleted: { $ne: true } } },
+      { $group: {
+        _id: '$driver',
+        totalTrips: { $sum: 1 },
+        totalDistance: { $sum: '$actualDistance' },
+        totalRevenue: { $sum: '$revenue' },
+        totalFuel: { $sum: '$fuelConsumed' }
+      }},
+      { $lookup: { from: 'drivers', localField: '_id', foreignField: '_id', as: 'driver' } },
+      { $unwind: '$driver' },
+      { $project: {
+        driverId: '$_id',
+        name: '$driver.name',
+        licenseNumber: '$driver.licenseNumber',
+        totalTrips: 1, totalDistance: 1, totalRevenue: 1, totalFuel: 1,
+        safetyScore: { $ifNull: ['$driver.safetyScore', 100] },
+        avgFuelPerKm: { $cond: [{ $gt: ['$totalDistance', 0] }, { $divide: ['$totalFuel', '$totalDistance'] }, 0] }
+      }},
+      { $sort: { totalRevenue: -1 } }
+    ]);
     res.json({ success: true, data: report });
   } catch (err) {
     next(err);
@@ -177,4 +236,4 @@ const exportTripsCSV = async (req, res, next) => {
   }
 };
 
-module.exports = { getDashboardKPIs, getFuelEfficiencyReport, getOperationalCostReport, exportTripsCSV };
+module.exports = { getDashboardKPIs, getFuelEfficiencyReport, getOperationalCostReport, getDriverPerformanceReport, exportTripsCSV };

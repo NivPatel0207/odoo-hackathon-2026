@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analytics | TransitOps</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    
+    <div class="main-content">
+      <header class="app-header">
+        <div class="header-title">Fuel & Revenue Analytics</div>
+      </header>
+
+      <main class="page-content" role="main">
+        <div class="grid grid-cols-12 gap-6">
+          <div class="col-span-8 card">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+              <h3 class="card-title">Fuel Efficiency by Vehicle</h3>
+              <select id="chart-fuel-filter" class="form-select" style="width: auto; padding: 4px 12px; font-size: 0.85rem; height: auto;">
+                <!-- Populated dynamically by JS -->
+              </select>
+            </div>
+            <div class="mt-4" style="height: 300px;">
+              <canvas id="fuelChart"></canvas>
+            </div>
+          </div>
+          <div class="col-span-4 card">
+            <div class="card-header">
+              <h3 class="card-title">Top Performers</h3>
+            </div>
+            <div id="top-performers" class="mt-4 flex flex-col gap-3">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" integrity="sha384-dug+JxfBvklEQdJ4AYuBBAIScUz0bVN73xpy273gcAwHjb3qI0fXmuYNaNfdyYJG" crossorigin="anonymous" defer></script>
+  
+  <script src="js/config.js" defer></script>
+  <script src="js/store.js" defer></script>
+  <script src="js/utils/ui-components.js" defer></script>
+  <script src="js/services/api.js?v=1785860185879" defer></script>
+  <script src="js/services/auth.js?v=1785860185879" defer></script>
+  <script src="js/pages/analytics.js" defer></script>
+</body>
+</html>

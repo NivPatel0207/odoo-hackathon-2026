@@ -1,0 +1,61 @@
+name: TransitOps CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+        
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+
+    - name: Install Dependencies
+      working-directory: ./backend
+      run: npm ci
+
+    - name: Run Linter
+      working-directory: ./backend
+      run: npm run lint --if-present
+
+    - name: Run Unit Tests
+      working-directory: ./backend
+      run: npm test --if-present
+      env:
+        NODE_ENV: test
+        JWT_SECRET: test_secret
+        MONGO_URI: mongodb://localhost:27017/transitops_test
+
+  docker-build:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Build Docker Image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: false # Set to true when registry is configured
+        tags: transitops/api:latest

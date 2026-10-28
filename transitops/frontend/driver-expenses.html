@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fuel & Expenses | TransitOps Driver</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .page-title { font-family: 'Outfit', sans-serif; font-weight: 700; }
+    
+    .premium-card {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .section-header {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.2rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--color-text-primary);
+      margin-bottom: 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 12px;
+    }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 8px; color: var(--color-text-muted); }
+    .form-group input, .form-group select {
+      width: 100%; padding: 12px; border-radius: 8px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      color: white; font-family: inherit;
+    }
+    .form-group select option, select option {
+      background-color: #111827;
+      color: #ffffff;
+      padding: 8px 12px;
+    }
+    .form-group input[type="file"] {
+      padding: 8px;
+    }
+
+    .btn-submit { background: var(--color-primary); color: #000; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; width: 100%; font-size: 1rem; margin-top: 16px; }
+    .btn-submit:hover { background: #e6b800; }
+
+    .tabs { display: flex; gap: 12px; margin-bottom: 24px; }
+    .tab {
+      padding: 12px 24px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .tab.active {
+      background: var(--color-primary);
+      color: #000;
+      border-color: var(--color-primary);
+    }
+
+    .form-section { display: none; }
+    .form-section.active { display: block; }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main-content">
+      <header class="app-header">
+        <div class="header-left">
+          <h1 class="page-title">Fuel & Expenses</h1>
+        </div>
+      </header>
+      <main class="page-content">
+
+        <div class="premium-card" style="max-width: 600px; margin: 0 auto;">
+          <div class="tabs">
+            <div class="tab active" onclick="switchTab('fuel')" id="tab-fuel">Log Fuel</div>
+            <div class="tab" onclick="switchTab('expense')" id="tab-expense">Log Expense</div>
+          </div>
+
+          <!-- Fuel Form -->
+          <div id="form-fuel" class="form-section active">
+            <h2 class="section-header">Fuel Purchase</h2>
+            <form id="fuel-form">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                  <label>Quantity (Gallons/Liters)</label>
+                  <input type="number" id="fuel-qty" step="0.1" min="0.1" required placeholder="0.0">
+                </div>
+                <div class="form-group">
+                  <label>Total Cost (₹)</label>
+                  <input type="number" id="fuel-cost" step="0.01" min="0.01" required placeholder="0.00">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Station Location / Name</label>
+                <input type="text" id="fuel-station" placeholder="e.g. Love's Travel Stop #123">
+              </div>
+              <div class="form-group">
+                <label>Upload Receipt</label>
+                <input type="file" id="fuel-receipt" accept="image/*">
+                <p style="font-size: 0.8rem; color: var(--color-text-muted); margin-top: 4px;">Take a clear photo of the pump receipt.</p>
+              </div>
+              <button type="submit" class="btn-submit">Submit Fuel Log</button>
+            </form>
+          </div>
+
+          <!-- Expense Form -->
+          <div id="form-expense" class="form-section">
+            <h2 class="section-header">Other Expense</h2>
+            <form id="expense-form">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                  <label>Expense Type</label>
+                  <select id="exp-type" required>
+                    <option value="toll">Toll</option>
+                    <option value="parking">Parking</option>
+                    <option value="fine">Fine / Ticket</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Total Amount (₹)</label>
+                  <input type="number" id="exp-amount" step="0.01" min="0.01" required placeholder="0.00">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Description</label>
+                <input type="text" id="exp-desc" required placeholder="e.g. George Washington Bridge Toll">
+              </div>
+              <div class="form-group">
+                <label>Upload Receipt</label>
+                <input type="file" id="exp-receipt" accept="image/*">
+                <p style="font-size: 0.8rem; color: var(--color-text-muted); margin-top: 4px;">Required for reimbursement.</p>
+              </div>
+              <button type="submit" class="btn-submit">Submit Expense</button>
+            </form>
+          </div>
+
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="js/config.js" defer></script>
+  <script src="js/store.js" defer></script>
+  <script src="js/utils/ui-components.js" defer></script>
+  <script src="js/services/api.js" defer></script>
+  <script src="js/services/auth.js" defer></script>
+  <script src="js/pages/driver-expenses.js" defer></script>
+</body>
+</html>

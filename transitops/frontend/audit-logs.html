@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audit Logs | TransitOps</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    
+    <div class="main-content">
+      <header class="app-header">
+        <div class="header-title">Audit Logs</div>
+        <div class="flex gap-3">
+          <button class="btn btn-primary" onclick="loadAuditLogs()">Refresh Logs</button>
+        </div>
+      </header>
+
+      <main class="page-content" role="main">
+        <h1 class="page-title">Security & Audit Logs</h1>
+        <p class="page-subtitle">Track system actions and security events</p>
+
+        <div class="card mt-6" id="security-logs-container">
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="data-table" id="audit-table">
+                <!-- Populated by JS -->
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div id="ai-chat-widget" style="position:fixed;bottom:20px;right:20px;width:300px;background:var(--color-bg-secondary);border:1px solid var(--color-border);border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,0.2);display:flex;flex-direction:column;z-index:9999;overflow:hidden;transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+    <div style="background:var(--color-primary);color:white;padding:10px 15px;font-weight:600;display:flex;justify-content:space-between;cursor:pointer;" onclick="toggleChat()">
+      <span>✨ AI Assistant</span>
+      <span>▼</span>
+    </div>
+    <div id="ai-chat-body" style="height:200px;padding:15px;overflow-y:auto;font-size:0.85rem;display:flex;flex-direction:column;gap:10px;">
+      <div style="align-self:flex-start;background:var(--color-bg-tertiary);padding:8px 12px;border-radius:8px;">Hello! I am your AI assistant. How can I help you today?</div>
+    </div>
+    <div style="border-top:1px solid var(--color-border);padding:10px;display:flex;gap:5px;">
+      <input type="text" id="ai-input" placeholder="Ask AI..." style="flex:1;background:var(--color-bg-primary);border:1px solid var(--color-border);border-radius:6px;padding:5px 10px;color:var(--color-text-primary);" onkeypress="if(event.key==='Enter') sendChat()">
+      <button class="btn btn-primary" style="padding:5px 10px;font-size:0.8rem;" onclick="sendChat()">Send</button>
+    </div>
+  </div>
+
+  <button id="ai-chat-fab" style="position:fixed;bottom:20px;right:20px;width:50px;height:50px;border-radius:25px;background:var(--color-primary);color:white;border:none;box-shadow:0 4px 12px rgba(0,0,0,0.3);font-size:1.5rem;cursor:pointer;z-index:9998;transition:transform 0.2s;" onclick="toggleChat()">✨</button>
+
+  <script src="js/config.js" defer></script>
+  <script src="js/store.js" defer></script>
+  <script src="js/utils/debounce.js" defer></script>
+  <script src="js/services/offline.js" defer></script>
+  <script src="js/utils/ui-components.js" defer></script>
+  <script src="js/services/api.js?v=1785860898440" defer></script>
+  <script src="js/services/auth.js?v=1785860185879" defer></script>
+  <script src="js/pages/audit-logs.js" defer></script>
+  <script>
+    function toggleChat() {
+      const widget = document.getElementById('ai-chat-widget');
+      const fab = document.getElementById('ai-chat-fab');
+      if (widget.style.transform === 'translateY(100%)') {
+        widget.style.transform = 'translateY(0)';
+        fab.style.transform = 'scale(0)';
+      } else {
+        widget.style.transform = 'translateY(100%)';
+        fab.style.transform = 'scale(1)';
+      }
+    }
+    async function sendChat() {
+      const input = document.getElementById('ai-input');
+      const body = document.getElementById('ai-chat-body');
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      body.innerHTML += `<div style="align-self:flex-end;background:var(--color-primary);color:white;padding:8px 12px;border-radius:8px;">${text}</div>`;
+      body.scrollTop = body.scrollHeight;
+      
+      const dots = document.createElement('div');
+      dots.style = "align-self:flex-start;background:var(--color-bg-tertiary);padding:8px 12px;border-radius:8px;";
+      dots.innerText = "...";
+      body.appendChild(dots);
+      body.scrollTop = body.scrollHeight;
+
+      try {
+        const data = await api.post('/ai/assistant', { message: text });
+        if (data && data.reply) {
+          dots.innerText = data.reply;
+        } else {
+          dots.innerText = "Error reaching AI.";
+        }
+      } catch(e) {
+        dots.innerText = "Error reaching AI.";
+      }
+      body.scrollTop = body.scrollHeight;
+    }
+  </script>
+</body>
+</html>

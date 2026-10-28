@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deliveries (EPOD) | TransitOps Driver</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .page-title { font-family: 'Outfit', sans-serif; font-weight: 700; }
+    
+    .premium-card {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .section-header {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--color-text-muted);
+      margin-bottom: 24px;
+    }
+
+    .trip-list { display: flex; flex-direction: column; gap: 16px; }
+
+    .trip-item {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      padding: 20px;
+      border-radius: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .trip-route { font-size: 1.2rem; font-weight: 600; color: white; margin-bottom: 4px; }
+    .trip-meta { font-size: 0.9rem; color: var(--color-text-muted); display: flex; gap: 12px; }
+
+    .btn-primary { background: var(--color-primary); color: #000; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-primary:hover { background: #e6b800; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      align-items: center; justify-content: center;
+      z-index: 2000;
+      backdrop-filter: blur(5px);
+    }
+    .modal-content {
+      background: #111; padding: 32px; border-radius: 24px;
+      border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 500px;
+    }
+    .modal-content h2 { margin-top: 0; margin-bottom: 24px; font-family: 'Outfit'; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 8px; color: var(--color-text-muted); }
+    .form-group input, .form-group select {
+      width: 100%; padding: 12px; border-radius: 8px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      color: white; font-family: inherit;
+    }
+    .form-group select option, select option {
+      background-color: #111827;
+      color: #ffffff;
+      padding: 8px 12px;
+    }
+
+    .btn-cancel { background: rgba(255,255,255,0.1); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+
+    /* Signature Canvas */
+    .signature-pad {
+      width: 100%;
+      height: 200px;
+      background: #fff;
+      border-radius: 8px;
+      cursor: crosshair;
+      border: 2px solid #ccc;
+    }
+
+    .clear-btn {
+      background: none;
+      border: none;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      text-decoration: underline;
+      font-size: 0.85rem;
+      margin-top: 8px;
+      padding: 0;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main-content">
+      <header class="app-header">
+        <div class="header-left">
+          <h1 class="page-title">Deliveries (EPOD)</h1>
+        </div>
+      </header>
+      <main class="page-content">
+
+        <div class="premium-card">
+          <div class="section-header">Pending Deliveries</div>
+          <p style="color: var(--color-text-muted); margin-bottom: 24px;">Select a trip to capture Electronic Proof of Delivery.</p>
+          
+          <div class="trip-list" id="delivery-list">
+            <div style="text-align: center; color: var(--color-text-muted); padding: 20px;">Loading pending deliveries...</div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- EPOD Modal -->
+  <div class="modal-overlay" id="epod-modal">
+    <div class="modal-content">
+      <h2>Capture EPOD</h2>
+      <div id="epod-trip-details" style="margin-bottom: 24px; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 12px;">
+        <div style="font-weight: 600;" id="epod-route">--</div>
+        <div style="font-size: 0.85rem; color: var(--color-text-muted);" id="epod-code">--</div>
+      </div>
+      
+      <form id="epod-form">
+        <div class="form-group">
+          <label>Recipient Name</label>
+          <input type="text" id="epod-name" required placeholder="Full Name">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label>Quantity Received</label>
+            <input type="number" id="epod-qty" required min="1">
+          </div>
+          <div class="form-group">
+            <label>Condition</label>
+            <select id="epod-condition" required>
+              <option value="Good">Good</option>
+              <option value="Damaged">Damaged</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Recipient Signature</label>
+          <canvas id="signature-pad" class="signature-pad"></canvas>
+          <button type="button" class="clear-btn" id="clear-signature">Clear Signature</button>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+          <button type="button" class="btn-cancel" onclick="closeEpodModal()">Cancel</button>
+          <button type="submit" class="btn-primary">Submit EPOD</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/config.js" defer></script>
+  <script src="js/store.js" defer></script>
+  <script src="js/utils/ui-components.js" defer></script>
+  <script src="js/services/api.js" defer></script>
+  <script src="js/services/auth.js" defer></script>
+  <script src="js/pages/driver-deliveries.js" defer></script>
+</body>
+</html>

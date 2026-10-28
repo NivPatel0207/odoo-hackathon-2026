@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Earnings | TransitOps Driver</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .page-title { font-family: 'Outfit', sans-serif; font-weight: 700; }
+    
+    .premium-card {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .section-header {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--color-text-muted);
+      margin-bottom: 24px;
+    }
+
+    .earnings-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .metric-card {
+      background: rgba(0,0,0,0.2);
+      border-radius: 20px;
+      padding: 32px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.05);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .metric-highlight {
+      position: absolute;
+      top: -20px; left: -20px;
+      width: 100px; height: 100px;
+      background: radial-gradient(circle, rgba(16,185,129,0.2) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .metric-label {
+      font-size: 0.9rem;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+
+    .metric-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: #6ee7b7; /* Green tint */
+      position: relative;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .history-item {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s;
+    }
+    .history-item:hover {
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(16,185,129,0.3);
+    }
+
+    .history-dates {
+      font-weight: 600;
+      color: white;
+      margin-bottom: 4px;
+    }
+    .history-meta {
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+    }
+    .history-amount {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #6ee7b7;
+    }
+    
+    .btn-download {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      margin-top: 8px;
+      transition: 0.2s;
+    }
+    .btn-download:hover { background: rgba(255,255,255,0.2); }
+
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main-content">
+      <header class="app-header">
+        <div class="header-left">
+          <h1 class="page-title">Earnings</h1>
+        </div>
+      </header>
+      <main class="page-content">
+
+        <div class="premium-card">
+          <div class="earnings-grid">
+            <div class="metric-card">
+              <div class="metric-highlight"></div>
+              <div class="metric-label">Total Earned (All Time)</div>
+              <div class="metric-value" id="val-total-earned">₹0.00</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-highlight" style="background: radial-gradient(circle, rgba(250,204,21,0.2) 0%, transparent 70%);"></div>
+              <div class="metric-label">Pending Payout (Est)</div>
+              <div class="metric-value" id="val-pending" style="color: #fcd34d;">₹0.00</div>
+              <div style="font-size: 0.85rem; color: var(--color-text-muted); margin-top: 6px;" id="pending-trips-sub"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="premium-card">
+          <div class="section-header">Settlement History</div>
+          <div class="history-list" id="history-list">
+            <div style="text-align: center; color: var(--color-text-muted); padding: 20px;">Loading settlement history...</div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="js/config.js" defer></script>
+  <script src="js/store.js" defer></script>
+  <script src="js/utils/ui-components.js" defer></script>
+  <script src="js/services/api.js" defer></script>
+  <script src="js/services/auth.js" defer></script>
+  <script src="js/pages/driver-earnings.js" defer></script>
+</body>
+</html>

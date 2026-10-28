@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Driver Dashboard | TransitOps</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    .page-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+    }
+
+    .driver-dashboard {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 32px;
+      margin-top: 10px;
+    }
+
+    /* Premium Glassmorphism Cards */
+    .premium-card {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 24px 32px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease;
+    }
+
+    .premium-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 32px 80px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Subtle glow behind the card */
+    .premium-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.06) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+
+
+    /* Driver Selector Bar */
+    .driver-selector {
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: linear-gradient(90deg, rgba(var(--color-primary-rgb), 0.15) 0%, rgba(0, 0, 0, 0.3) 100%);
+      backdrop-filter: blur(20px);
+      padding: 5px 25px;
+      border-radius: 24px;
+      border: 1px solid rgba(var(--color-primary-rgb), 0.25);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .driver-selector select {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: white;
+      border-radius: 14px;
+      padding: 10px 10px;
+      font-size: 1.05rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex: 1;
+      max-width: 320px;
+    }
+
+    .driver-selector select:hover {
+      border-color: rgba(255, 255, 255, 0.3);
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .driver-selector select:focus {
+      border-color: var(--color-primary);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.2);
+    }
+
+    /* Empty State */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 120px 20px;
+      text-align: center;
+      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.03) 0%, transparent 100%);
+      border-radius: 40px;
+      border: 1px dashed rgba(255, 255, 255, 0.1);
+      margin-top: 20px;
+    }
+
+    .empty-state svg {
+      width: 120px;
+      height: 120px;
+      color: var(--color-primary);
+      margin-bottom: 32px;
+      opacity: 0.9;
+      filter: drop-shadow(0 0 30px rgba(var(--color-primary-rgb), 0.4));
+    }
+
+    .empty-state h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.5rem;
+      color: var(--color-text-primary);
+      margin-bottom: 16px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .empty-state p {
+      color: var(--color-text-muted);
+      max-width: 500px;
+      line-height: 1.8;
+      font-size: 1.15rem;
+    }
+    /* Dashboard specific */
+    .dashboard-top-card {
+      grid-column: 1 / -1;
+      margin-bottom: 0px;
+    }
+    .dash-header {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--color-text-muted);
+      margin-bottom: 16px;
+    }
+    .dash-greeting {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: 32px;
+    }
+    .dash-metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 32px;
+      margin-bottom: 32px;
+    }
+    .dash-metric-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .dash-metric-label {
+      color: var(--color-text-muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    .dash-metric-value {
+      color: var(--color-text-primary);
+      font-size: 1.15rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dash-metric-value.status-dot::before {
+      content: '';
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--color-success);
+      box-shadow: 0 0 10px rgba(var(--color-success-rgb), 0.5);
+    }
+    .dash-metric-value.status-dot[data-status="OFF_DUTY"]::before {
+      background: #cbd5e1;
+      box-shadow: none;
+    }
+    .dash-metric-value.status-dot[data-status="DRIVING"]::before {
+      background: #34d399;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+    }
+    .dash-metric-value.status-dot[data-status="ON_DUTY"]::before {
+      background: #60a5fa;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+    }
+    .dash-metric-value.status-dot[data-status="SLEEPER"]::before {
+      background: #a78bfa;
+      box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+    }
+    .dash-compliance-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 20px;
+    }
+    .compliance-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 9999px;
+      padding: 6px 14px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      transition: all 0.2s ease;
+    }
+    .compliance-badge:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    .compliance-badge .compliance-label {
+      color: var(--color-text-muted);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .compliance-badge .compliance-value {
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+    .compliance-badge.status-success {
+      border-color: rgba(16, 185, 129, 0.25);
+      background: rgba(16, 185, 129, 0.06);
+    }
+    .compliance-badge.status-success .compliance-value {
+      color: var(--color-success);
+    }
+    .compliance-badge.status-warning {
+      border-color: rgba(245, 158, 11, 0.25);
+      background: rgba(245, 158, 11, 0.06);
+    }
+    .compliance-badge.status-warning .compliance-value {
+      color: var(--color-warning);
+    }
+    .compliance-badge.status-danger {
+      border-color: rgba(239, 68, 68, 0.25);
+      background: rgba(239, 68, 68, 0.06);
+    }
+    .compliance-badge.status-danger .compliance-value {
+      color: var(--color-danger);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <!-- Injected by auth.js -->
+    </aside>
+
+    <div class="main-content">
+      <!-- Header -->
+      <header class="app-header">
+        <div class="header-left">
+          <h1 class="page-title">Driver Dashboard</h1>
+        </div>
+      </header>
+
+      <main class="page-content">
+
+        <div class="driver-dashboard" id="driver-dashboard">
+        
+          <!-- Top Dashboard Card -->
+          <div class="premium-card dashboard-top-card">
+            <div class="dash-header">DRIVER DASHBOARD</div>
+            <div class="dash-greeting" id="dash-greeting">Good Morning, Driver</div>
+            
+            <div class="dash-metrics-grid">
+              <div class="dash-metric-item">
+                <div class="dash-metric-label">Current Status</div>
+                <div class="dash-metric-value status-dot" id="dash-status" data-status="OFF_DUTY">Off Duty</div>
+              </div>
+              
+              <div class="dash-metric-item">
+                <div class="dash-metric-label">Current Trip</div>
+                <div class="dash-metric-value" id="dash-trip-route" style="margin-bottom: 2px;">No Active Trip</div>
+                <div style="font-size: 0.9rem; color: var(--color-text-muted);" id="dash-trip-details">--</div>
+              </div>
+              
+              <div class="dash-metric-item">
+                <div class="dash-metric-label">Vehicle</div>
+                <div class="dash-metric-value" id="dash-vehicle-reg">Unassigned</div>
+                <div style="font-size: 0.9rem; color: var(--color-text-muted);" id="dash-vehicle-model">--</div>
+              </div>
+              
+              <div class="dash-metric-item">
+                <div class="dash-metric-label">Driving Time Remaining</div>
+                <div class="dash-metric-value" id="dash-time-remaining">--h --m</div>
+              </div>
+            </div>
+            
+            <div class="dash-compliance-bar" id="dash-compliance-bar">
+              <div class="compliance-badge status-success" id="badge-license">
+                <span>🛡️</span>
+                <span class="compliance-label">License</span>
+                <span class="compliance-value" id="val-license-status">Active</span>
+              </div>
+              <div class="compliance-badge status-success" id="badge-kyc">
+                <span>✓</span>
+                <span class="compliance-label">KYC</span>
+                <span class="compliance-value" id="val-kyc-status">Verified</span>
+              </div>
+              <div class="compliance-badge status-success" id="badge-readiness">
+                <span>⚡</span>
+                <span class="compliance-label">Dispatch</span>
+                <span class="compliance-value" id="val-readiness-status">Ready</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Grid: Two columns -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 32px; grid-column: 1 / -1;">
+            
+            <!-- Upcoming Schedule Widget -->
+            <div class="premium-card">
+              <div class="dash-header" style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+                <span>Upcoming Schedule</span>
+                <a href="trips.html" style="font-size: 0.8rem; color: var(--color-primary); text-decoration: none;">View All</a>
+              </div>
+              <div id="upcoming-trips-list" style="display: flex; flex-direction: column; gap: 16px;">
+                <!-- Populated by JS -->
+                <div style="text-align: center; color: var(--color-text-muted); padding: 20px;">Loading schedule...</div>
+              </div>
+            </div>
+
+            <!-- Performance & Safety Widget -->
+            <div class="premium-card">
+              <div class="dash-header" style="margin-bottom: 24px;">Performance & Safety</div>
+              
+              <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 32px; position: relative;">
+                <svg viewBox="0 0 36 36" style="width: 150px; height: 150px;">
+                  <path stroke-dasharray="100, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3"></path>
+                  <path id="safety-score-ring" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--color-success)" stroke-width="3" style="transition: stroke-dasharray 1s ease-out;"></path>
+                </svg>
+                <div style="position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                  <span id="safety-score-value" style="font-size: 2.5rem; font-weight: 800; font-family: 'Outfit', sans-serif; line-height: 1; color: var(--color-text-primary);">--</span>
+                  <span style="font-size: 0.8rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 1px;">Safety Score</span>
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 24px;">
+                <div style="text-align: center;">
+                  <div id="stat-completed-trips" style="font-size: 1.8rem; font-weight: 700; color: var(--color-text-primary);">--</div>
+                  <div style="font-size: 0.85rem; color: var(--color-text-muted);">Completed Trips</div>
+                </div>
+                <div style="text-align: center;">
+                  <div id="stat-incidents" style="font-size: 1.8rem; font-weight: 700; color: var(--color-success);">0</div>
+                  <div style="font-size: 0.85rem; color: var(--color-text-muted);">Incidents Logged</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="js/config.js" defer></script>
+  <script src="js/store.js" defer></script>
+  <script src="js/utils/ui-components.js" defer></script>
+  <script src="js/services/api.js" defer></script>
+  <script src="js/services/auth.js" defer></script>
+  <script src="js/pages/driver-dashboard.js?v=1785863000000" defer></script>
+</body>
+
+</html>

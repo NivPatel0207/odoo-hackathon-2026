@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transitops-api
+  labels:
+    app: transitops-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: transitops-api
+  template:
+    metadata:
+      labels:
+        app: transitops-api
+    spec:
+      containers:
+      - name: transitops-api
+        image: transitops/api:latest
+        ports:
+        - containerPort: 5000
+        envFrom:
+        - configMapRef:
+            name: transitops-config
+        - secretRef:
+            name: transitops-secrets
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "512Mi"
+          limits:
+            cpu: "500m"
+            memory: "1Gi"
+        livenessProbe:
+          httpGet:
+            path: /api/v1/health
+            port: 5000
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /api/v1/health
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 10

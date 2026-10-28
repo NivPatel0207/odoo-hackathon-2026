@@ -1,6 +1,10 @@
+const logger = require('../utils/logger');
+
 const errorMiddleware = (err, req, res, next) => {
   let statusCode = err.statusCode || 500;
   let message = err.message || 'Internal Server Error';
+
+  logger.error(`${message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
 
   // Mongoose duplicate key error
   if (err.code === 11000) {
@@ -25,12 +29,15 @@ const errorMiddleware = (err, req, res, next) => {
     message = 'Token expired';
   }
 
-  console.error(`[ERROR] ${statusCode}: ${message}`);
+  const isProduction = process.env.NODE_ENV === 'production';
+  const responseMessage = (statusCode === 500 && isProduction) 
+    ? 'Internal Server Error' 
+    : message;
 
   res.status(statusCode).json({
     success: false,
-    message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    message: responseMessage,
+    ...(!isProduction && { stack: err.stack })
   });
 };
 

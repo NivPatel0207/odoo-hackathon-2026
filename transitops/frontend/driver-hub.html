@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Driver Hub | TransitOps</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    .page-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+    }
+
+    .driver-dashboard {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 32px;
+      margin-top: 10px;
+    }
+
+    /* Premium Glassmorphism Cards */
+    .premium-card {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 24px 32px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease;
+    }
+
+    .premium-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 32px 80px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Subtle glow behind the card */
+    .premium-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.06) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    /* ELD Specific */
+    .eld-card {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .eld-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 20px;
+      border-radius: 40px;
+      font-weight: 800;
+      font-size: 0.9rem;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      transition: all 0.4s ease;
+    }
+
+    .status-off_duty {
+      background: rgba(148, 163, 184, 0.15);
+      color: #cbd5e1;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    .status-driving {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.25);
+      animation: pulse-green 2s infinite;
+    }
+
+    .status-on_duty {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      box-shadow: 0 0 30px rgba(59, 130, 246, 0.25);
+      animation: pulse-blue 2s infinite;
+    }
+
+    .status-sleeper {
+      background: rgba(139, 92, 246, 0.15);
+      color: #a78bfa;
+      border: 1px solid rgba(139, 92, 246, 0.4);
+      box-shadow: 0 0 30px rgba(139, 92, 246, 0.25);
+    }
+
+    @keyframes pulse-green {
+      0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+      }
+
+      70% {
+        box-shadow: 0 0 0 20px rgba(16, 185, 129, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+      }
+    }
+
+    @keyframes pulse-blue {
+      0% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5);
+      }
+
+      70% {
+        box-shadow: 0 0 0 20px rgba(59, 130, 246, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+      }
+    }
+
+    .timer-ring-container {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .timer-ring-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+      filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.05));
+    }
+
+    .timer-display {
+      font-size: 3.5rem;
+      font-weight: 800;
+      font-family: 'Outfit', sans-serif;
+      background: linear-gradient(180deg, #ffffff 0%, #a1a1aa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+      text-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      z-index: 2;
+      margin-top: 10px;
+    }
+
+    .timer-label {
+      color: var(--color-text-muted);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      margin-bottom: 24px;
+      font-weight: 600;
+    }
+
+    .eld-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .eld-btn {
+      padding: 12px 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+      color: var(--color-text-primary);
+      font-weight: 600;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .eld-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at top, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .eld-btn svg {
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      color: var(--color-text-muted);
+      width: 28px;
+      height: 28px;
+    }
+
+    .eld-btn:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .eld-btn:hover::before {
+      opacity: 1;
+    }
+
+    .eld-btn:hover svg {
+      transform: scale(1.15);
+      color: var(--color-text-primary);
+    }
+
+    .eld-btn.active {
+      border-color: var(--color-primary);
+      background: rgba(var(--color-primary-rgb), 0.12);
+      color: var(--color-primary);
+      box-shadow: 0 12px 40px rgba(var(--color-primary-rgb), 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .eld-btn.active svg {
+      color: var(--color-primary);
+      filter: drop-shadow(0 0 10px rgba(var(--color-primary-rgb), 0.7));
+      transform: scale(1.1);
+    }
+
+    /* Settlements Specific */
+    .settlement-card {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(9, 14, 23, 0.8) 100%);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .pay-amount {
+      font-size: 3.5rem;
+      font-weight: 800;
+      font-family: 'Outfit', sans-serif;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 4px;
+      line-height: 1;
+      filter: drop-shadow(0 4px 20px rgba(16, 185, 129, 0.25));
+    }
+
+    .pay-label {
+      color: var(--color-text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 24px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    .trip-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-height: 420px;
+      overflow-y: auto;
+      padding-right: 8px;
+      flex: 1;
+    }
+
+    .trip-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .trip-list::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 6px;
+    }
+
+    .trip-list::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+    }
+
+    .trip-list::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .trip-item {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 20px;
+      padding: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .trip-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--color-primary);
+      border-radius: 4px 0 0 4px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .trip-item:hover {
+      background: rgba(255, 255, 255, 0.06);
+      transform: translateX(6px);
+      border-color: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .trip-item:hover::before {
+      opacity: 1;
+    }
+
+    .trip-item-left {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* Driver Selector Bar */
+    .driver-selector {
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: linear-gradient(90deg, rgba(var(--color-primary-rgb), 0.15) 0%, rgba(0, 0, 0, 0.3) 100%);
+      backdrop-filter: blur(20px);
+      padding: 5px 25px;
+      border-radius: 24px;
+      border: 1px solid rgba(var(--color-primary-rgb), 0.25);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .driver-selector select {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: white;
+      border-radius: 14px;
+      padding: 10px 10px;
+      font-size: 1.05rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex: 1;
+      max-width: 320px;
+    }
+
+    .driver-selector select:hover {
+      border-color: rgba(255, 255, 255, 0.3);
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .driver-selector select:focus {
+      border-color: var(--color-primary);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.2);
+    }
+
+    /* Empty State */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 120px 20px;
+      text-align: center;
+      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.03) 0%, transparent 100%);
+      border-radius: 40px;
+      border: 1px dashed rgba(255, 255, 255, 0.1);
+      margin-top: 20px;
+    }
+
+    .empty-state svg {
+      width: 120px;
+      height: 120px;
+      color: var(--color-primary);
+      margin-bottom: 32px;
+      opacity: 0.9;
+      filter: drop-shadow(0 0 30px rgba(var(--color-primary-rgb), 0.4));
+    }
+
+    .empty-state h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.5rem;
+      color: var(--color-text-primary);
+      margin-bottom: 16px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .empty-state p {
+      color: var(--color-text-muted);
+      max-width: 500px;
+      line-height: 1.8;
+      font-size: 1.15rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <!-- Injected by auth.js -->
+    </aside>
+
+    <div class="main-content">
+      <!-- Header -->
+      <header class="app-header">
+        <div class="header-left">
+          <h1 class="page-title">Driver Hub</h1>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="page-content">
+
+        <div class="driver-selector" id="admin-driver-selector" style="display: none;">
+          <div
+            style="font-weight: 700; color: var(--color-primary); letter-spacing: 1.5px; text-transform: uppercase; font-size: 0.95rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              style="vertical-align: middle; margin-right: 8px; margin-top: -3px;">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            Simulate Driver View
+          </div>
+          <select id="driver-select" onchange="loadDriverData()">
+            <option value="">Select a driver to view hub...</option>
+          </select>
+        </div>
+
+        <!-- Empty State UI -->
+        <div id="driver-empty-state" class="empty-state">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+          </svg>
+          <h3>Driver Portal Viewer</h3>
+          <p>Please select a driver from the dropdown above to securely access their live ELD metrics, duty status, and
+            pending payroll settlements.</p>
+        </div>
+
+        <div class="driver-dashboard" id="driver-dashboard" style="display: none;">
+
+          <!-- ELD Panel -->
+          <div class="premium-card eld-card">
+            <h2
+              style="margin-top:0; margin-bottom: 24px; font-size: 1.4rem; font-family: 'Outfit', sans-serif; font-weight: 700;">
+              Hours of Service (ELD)</h2>
+            <div id="eld-status-badge" class="eld-status-badge status-off_duty">OFF DUTY</div>
+
+            <div class="timer-ring-container">
+              <svg class="timer-ring-svg" viewBox="0 0 200 200">
+                <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="6"></circle>
+                <circle id="eld-timer-circle" cx="100" cy="100" r="90" fill="none" stroke="var(--color-primary)"
+                  stroke-width="6" stroke-dasharray="565.48" stroke-dashoffset="140" stroke-linecap="round"
+                  style="transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1);"></circle>
+              </svg>
+              <div id="eld-timer" class="timer-display">11:00</div>
+            </div>
+            <div class="timer-label">Remaining Drive Time</div>
+
+            <div class="eld-controls">
+              <button class="eld-btn" id="btn-OFF_DUTY" onclick="changeEldStatus('OFF_DUTY')">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                  <line x1="12" y1="2" x2="12" y2="12"></line>
+                </svg>
+                OFF DUTY
+              </button>
+              <button class="eld-btn" id="btn-SLEEPER" onclick="changeEldStatus('SLEEPER')">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 4v16"></path>
+                  <path d="M2 8h18a2 2 0 0 1 2 2v10"></path>
+                  <path d="M2 17h20"></path>
+                  <path d="M6 8v9"></path>
+                </svg>
+                SLEEPER
+              </button>
+              <button class="eld-btn" id="btn-DRIVING" onclick="changeEldStatus('DRIVING')">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                DRIVING
+              </button>
+              <button class="eld-btn" id="btn-ON_DUTY" onclick="changeEldStatus('ON_DUTY')">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                ON DUTY
+              </button>
+            </div>
+          </div>
+
+          <!-- Settlements Panel -->
+          <div class="premium-card settlement-card">
+            <h2
+              style="margin-top:0; margin-bottom: 24px; font-size: 1.4rem; font-family: 'Outfit', sans-serif; font-weight: 700;">
+              Pending Settlements</h2>
+            <div id="est-pay" class="pay-amount">₹0.00</div>
+            <div id="pay-type" class="pay-label">Estimated Pay (Per Trip)</div>
+
+            <h3
+              style="font-size: 1.1rem; font-family: 'Outfit', sans-serif; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px; color: var(--color-text-primary);">
+              Pending Trips (<span id="pending-count">0</span>)</h3>
+            <div class="trip-list" id="pending-trips">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="js/config.js" defer></script>
+  <script src="js/store.js" defer></script>
+  <script src="js/utils/ui-components.js" defer></script>
+  <script src="js/services/api.js" defer></script>
+  <script src="js/services/auth.js" defer></script>
+  <script src="js/pages/driver-hub.js" defer></script>
+</body>
+
+</html>

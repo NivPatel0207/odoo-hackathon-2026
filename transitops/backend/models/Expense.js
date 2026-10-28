@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
+const applyBaseSchema = require('../utils/applyBaseSchema');
 
 const ExpenseSchema = new mongoose.Schema({
+  driver: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Driver',
+    required: [true, 'Driver is required']
+  },
   vehicle: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Vehicle',
@@ -29,7 +35,27 @@ const ExpenseSchema = new mongoose.Schema({
   description: {
     type: String,
     trim: true
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'pending'
+  },
+  approvedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
+  },
+  rejectionReason: {
+    type: String,
+    trim: true
+  },
+  receiptUrl: {
+    type: String,
+    trim: true
   }
 }, { timestamps: true });
+
+applyBaseSchema(ExpenseSchema);
 
 module.exports = mongoose.model('Expense', ExpenseSchema);

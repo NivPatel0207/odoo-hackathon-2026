@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Incidents | TransitOps Driver</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .page-title { font-family: 'Outfit', sans-serif; font-weight: 700; }
+    
+    .emergency-card {
+      background: linear-gradient(145deg, rgba(220, 38, 38, 0.1) 0%, rgba(153, 27, 27, 0.2) 100%);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 32px;
+      border: 1px solid rgba(220, 38, 38, 0.3);
+      padding: 48px;
+      margin: 48px auto;
+      max-width: 600px;
+      text-align: center;
+      box-shadow: 0 24px 64px rgba(220, 38, 38, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .emergency-icon {
+      width: 80px;
+      height: 80px;
+      background: rgba(220, 38, 38, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px auto;
+      color: #fca5a5;
+    }
+
+    .emergency-title {
+      font-family: 'Outfit';
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+    }
+
+    .emergency-desc {
+      color: #fca5a5;
+      font-size: 1.1rem;
+      margin-bottom: 32px;
+    }
+
+    .btn-sos {
+      background: #dc2626;
+      color: #fff;
+      border: none;
+      padding: 20px 40px;
+      border-radius: 16px;
+      font-family: 'Outfit';
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 8px 32px rgba(220, 38, 38, 0.4);
+      width: 100%;
+    }
+    .btn-sos:hover { background: #ef4444; transform: translateY(-2px); box-shadow: 0 12px 40px rgba(220, 38, 38, 0.6); }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      align-items: center; justify-content: center;
+      z-index: 2000;
+      backdrop-filter: blur(8px);
+    }
+    .modal-content {
+      background: #111; padding: 32px; border-radius: 24px;
+      border: 1px solid rgba(220, 38, 38, 0.3); width: 100%; max-width: 500px;
+    }
+    .modal-content h2 { margin-top: 0; margin-bottom: 24px; font-family: 'Outfit'; color: #ef4444; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 8px; color: var(--color-text-muted); }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 12px; border-radius: 8px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      color: white; font-family: inherit;
+    }
+    .form-group select option, select option {
+      background-color: #111827;
+      color: #ffffff;
+      padding: 8px 12px;
+    }
+    
+    .btn-submit { background: #dc2626; color: #fff; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-submit:hover { background: #ef4444; }
+    .btn-cancel { background: rgba(255,255,255,0.1); color: #fff; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 600; cursor: pointer; }
+
+    .get-location-btn {
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main-content">
+      <header class="app-header">
+        <div class="header-left">
+          <h1 class="page-title">Incidents</h1>
+        </div>
+      </header>
+      <main class="page-content">
+
+        <div class="emergency-card">
+          <div class="emergency-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          </div>
+          <h2 class="emergency-title">Emergency Report</h2>
+          <p class="emergency-desc">Use this only to report active accidents, critical breakdowns, or hazardous spills. Dispatch will be notified instantly.</p>
+          
+          <button class="btn-sos" onclick="document.getElementById('incident-modal').style.display='flex'">REPORT INCIDENT</button>
+        </div>
+        
+        <div class="premium-card" style="margin-top: 48px; max-width: 600px; margin-left: auto; margin-right: auto; padding: 32px;">
+          <h3 style="font-family: 'Outfit'; margin-top: 0; color: white;">Your Reported Incidents</h3>
+          <div id="incident-list">
+             <div style="color: var(--color-text-muted); text-align: center;">Loading incidents...</div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Incident Modal -->
+  <div class="modal-overlay" id="incident-modal">
+    <div class="modal-content">
+      <h2>Emergency Details</h2>
+      <form id="incident-form">
+        <div class="form-group">
+          <label>Incident Type</label>
+          <select id="inc-type" required>
+            <option value="accident">Accident / Collision</option>
+            <option value="breakdown">Critical Breakdown</option>
+            <option value="spill">Hazardous Spill</option>
+            <option value="medical">Medical Emergency</option>
+            <option value="other">Other Emergency</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Severity</label>
+          <select id="inc-severity" required>
+            <option value="high">High</option>
+            <option value="critical">Critical</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Associated Trip (Optional)</label>
+          <select id="inc-trip">
+            <option value="">None (Not Trip Related)</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Current Location (Optional)</label>
+          <input type="text" id="inc-location" placeholder="E.g. I-95 North, Mile Marker 42">
+        </div>
+        
+        <div class="form-group">
+          <label>Description of Incident</label>
+          <textarea id="inc-desc" rows="4" required placeholder="Provide brief details about what happened..."></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>Photo Evidence (Optional)</label>
+          <input type="file" id="inc-media" accept="image/*">
+        </div>
+        
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+          <button type="button" class="btn-cancel" onclick="document.getElementById('incident-modal').style.display='none'">Cancel</button>
+          <button type="submit" class="btn-submit">Submit Alert</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/config.js" defer></script>
+  <script src="js/store.js" defer></script>
+  <script src="js/utils/ui-components.js" defer></script>
+  <script src="js/services/api.js" defer></script>
+  <script src="js/services/auth.js" defer></script>
+  <script src="js/pages/driver-incidents.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings | TransitOps</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    .settings-container {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    
+    /* Horizontal Navbar */
+    .settings-nav {
+      display: flex;
+      gap: 1rem;
+      background: var(--color-bg-secondary);
+      border: 1px solid var(--color-border-glass);
+      border-radius: 12px;
+      padding: 0.5rem 1rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      overflow-x: auto;
+    }
+    
+    .settings-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    
+    .settings-nav-item:hover {
+      background: var(--color-bg-card-hover);
+      color: var(--color-text-primary);
+    }
+    
+    .settings-nav-item.active {
+      background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+      color: var(--color-primary);
+      border-bottom: 3px solid var(--color-primary);
+      border-radius: 8px 8px 0 0;
+    }
+    
+    .settings-nav-item svg {
+      width: 1.15rem;
+      height: 1.15rem;
+    }
+
+    /* Content Area */
+    .settings-content {
+      background: var(--color-bg-secondary);
+      border: 1px solid var(--color-border-glass);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      min-height: 400px;
+    }
+
+    /* Section Visibility */
+    .settings-section {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    .settings-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .settings-section h2 {
+      font-size: 1.5rem;
+      color: var(--color-text-primary);
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 0.75rem;
+    }
+
+    .theme-options {
+      display: inline-flex;
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border-glass);
+      border-radius: 50px;
+      padding: 0.5rem;
+      gap: 0.5rem;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .theme-option {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 110px;
+      gap: 0.5rem;
+      padding: 0.6rem 1.25rem;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      color: var(--color-text-secondary);
+      background: transparent;
+    }
+    .color-circle {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+    .theme-option.active .color-circle {
+      width: 0;
+      opacity: 0;
+      margin-right: -0.5rem;
+    }
+    .theme-option:hover {
+      color: var(--color-text-primary);
+      background: var(--color-bg-card-hover);
+    }
+    .theme-option.active {
+      background: var(--color-primary);
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      transform: scale(1.05);
+    }
+    .theme-option i {
+      font-size: 1.25rem;
+      font-style: normal;
+      transition: transform 0.3s ease;
+    }
+    .theme-option.active i {
+      transform: rotate(-10deg) scale(1.1);
+    }
+    .theme-option-label {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    .password-form {
+      max-width: 450px;
+    }
+    
+    /* Custom Toggle Switch */
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: var(--color-border);
+      transition: .3s;
+      border-radius: 24px;
+    }
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .toggle-switch input:checked + .toggle-slider {
+      background-color: var(--color-primary);
+    }
+    .toggle-switch input:checked + .toggle-slider:before {
+      transform: translateX(20px);
+    }
+
+    /* Elegant Notification Cards */
+    .notification-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 1.5rem;
+      border: 1px solid var(--color-border-glass);
+      border-radius: 12px;
+      background: var(--color-bg-card);
+      transition: all 0.3s ease;
+    }
+    .notification-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
+    }
+    .notification-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+      color: var(--color-primary);
+      margin-right: 1.25rem;
+      flex-shrink: 0;
+    }
+    .notification-content {
+      flex: 1;
+    }
+    /* Base Styles */
+  </style>
+</head>
+
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    
+    <div class="main-content">
+      <header class="app-header">
+        <div class="header-title">Settings</div>
+      </header>
+
+      <main class="page-content" role="main">
+        <h1 class="page-title">Settings</h1>
+        <p class="page-subtitle">Manage your preferences and security</p>
+
+        <div class="settings-container">
+          <!-- Inner Navbar -->
+          <nav class="settings-nav">
+            <div class="settings-nav-item active" data-target="appearance">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
+              Appearance
+            </div>
+            <div class="settings-nav-item" data-target="security">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+              Security
+            </div>
+            <div class="settings-nav-item" data-target="notifications">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+              Notifications
+            </div>
+          </nav>
+
+          <!-- Content Panels -->
+          <div class="settings-content">
+            
+            <!-- Appearance Section -->
+            <div id="appearance" class="settings-section active">
+              <h2>Appearance</h2>
+              <p style="color: var(--color-text-muted); margin-bottom: 2rem;">Customize how TransitOps looks on your device.</p>
+              
+              <!-- Theme -->
+              <div style="margin-bottom: 2rem;">
+                <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--color-text-primary);">Theme</h3>
+                <div class="theme-options" id="theme-selector">
+                  <div class="theme-option" data-theme-val="system" id="theme-btn-system">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <span class="theme-option-label">System</span>
+                  </div>
+                  <div class="theme-option" data-theme-val="dark" id="theme-btn-dark">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                    <span class="theme-option-label">Dark</span>
+                  </div>
+                  <div class="theme-option" data-theme-val="light" id="theme-btn-light">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <span class="theme-option-label">Light</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Accent Color -->
+              <div style="margin-bottom: 2rem;">
+                <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--color-text-primary);">Accent Color</h3>
+                <div class="theme-options" id="accent-selector">
+                  <div class="theme-option" data-accent-val="orange" id="accent-btn-orange">
+                    <div class="color-circle" style="background:#f59e0b;"></div>
+                    <span class="theme-option-label">Orange</span>
+                  </div>
+                  <div class="theme-option" data-accent-val="blue" id="accent-btn-blue">
+                    <div class="color-circle" style="background:#3b82f6;"></div>
+                    <span class="theme-option-label">Blue</span>
+                  </div>
+                  <div class="theme-option" data-accent-val="green" id="accent-btn-green">
+                    <div class="color-circle" style="background:#10b981;"></div>
+                    <span class="theme-option-label">Green</span>
+                  </div>
+                  <div class="theme-option" data-accent-val="purple" id="accent-btn-purple">
+                    <div class="color-circle" style="background:#8b5cf6;"></div>
+                    <span class="theme-option-label">Purple</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Density -->
+              <div style="margin-bottom: 2rem;">
+                <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--color-text-primary);">Layout Density</h3>
+                <div class="theme-options" id="density-selector">
+                  <div class="theme-option" data-density-val="comfortable" id="density-btn-comfortable">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    <span class="theme-option-label">Comfortable</span>
+                  </div>
+                  <div class="theme-option" data-density-val="compact" id="density-btn-compact">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 12h16M4 16h16"></path></svg>
+                    <span class="theme-option-label">Compact</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Font Size -->
+              <div style="margin-bottom: 2rem;">
+                <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--color-text-primary);">Font Size</h3>
+                <div class="theme-options" id="font-selector">
+                  <div class="theme-option" data-font-val="small" id="font-btn-small">
+                    <span class="theme-option-label" style="font-size: 0.85rem;">Small</span>
+                  </div>
+                  <div class="theme-option" data-font-val="medium" id="font-btn-medium">
+                    <span class="theme-option-label">Medium</span>
+                  </div>
+                  <div class="theme-option" data-font-val="large" id="font-btn-large">
+                    <span class="theme-option-label" style="font-size: 1.15rem;">Large</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Animations & Sidebar -->
+              <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+                <div>
+                  <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--color-text-primary);">Animations</h3>
+                  <div class="theme-options" id="animations-selector">
+                    <div class="theme-option" data-animations-val="true" id="animations-btn-true">
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+                      <span class="theme-option-label">On</span>
+                    </div>
+                    <div class="theme-option" data-animations-val="false" id="animations-btn-false">
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+                      <span class="theme-option-label">Off</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--color-text-primary);">Sidebar</h3>
+                  <div class="theme-options" id="sidebar-selector">
+                    <div class="theme-option" data-sidebar-val="expanded" id="sidebar-btn-expanded">
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+                      <span class="theme-option-label">Expanded</span>
+                    </div>
+                    <div class="theme-option" data-sidebar-val="collapsed" id="sidebar-btn-collapsed">
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16"></path></svg>
+                      <span class="theme-option-label">Collapsed</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <p id="appearance-success" style="color: var(--color-success); margin-top: 2rem; display: none; font-weight: 500;">Preferences successfully updated!</p>
+            </div>
+
+            <!-- Security Section -->
+            <div id="security" class="settings-section">
+              <h2>Security</h2>
+              <p style="color: var(--color-text-muted); margin-bottom: 2rem;">Update your password to keep your account secure.</p>
+              
+              <form id="password-form" class="password-form">
+                <div class="form-floating" style="margin-bottom: 1rem;">
+                  <input type="password" id="current-password" class="form-input password-input" placeholder=" " required>
+                  <label for="current-password">Current Password</label>
+                  <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('current-password', this)" aria-label="Toggle password visibility">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  </button>
+                </div>
+                <div class="form-floating" style="margin-bottom: 1rem;">
+                  <input type="password" id="new-password" class="form-input password-input" placeholder=" " required minlength="6">
+                  <label for="new-password">New Password</label>
+                  <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('new-password', this)" aria-label="Toggle password visibility">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  </button>
+                </div>
+                <div class="form-floating" style="margin-bottom: 1.5rem;">
+                  <input type="password" id="confirm-password" class="form-input password-input" placeholder=" " required minlength="6">
+                  <label for="confirm-password">Confirm New Password</label>
+                  <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('confirm-password', this)" aria-label="Toggle password visibility">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  </button>
+                </div>
+                
+                <div id="password-error" style="color: var(--color-danger); margin-bottom: 1rem; display: none;"></div>
+                <div id="password-success" style="color: var(--color-success); margin-bottom: 1rem; display: none;"></div>
+
+                <div style="margin-top: 1.5rem;">
+                  <button type="submit" class="btn btn-primary">Change Password</button>
+                </div>
+              </form>
+            </div>
+            
+            <!-- Notifications Section -->
+            <div id="notifications" class="settings-section">
+              <h2>Notifications</h2>
+              <p style="color: var(--color-text-muted); margin-bottom: 2rem;">Manage how you receive alerts and updates.</p>
+              
+              <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                <!-- Email Notifications -->
+                <div class="notification-card">
+                  <div style="display: flex; align-items: center; flex: 1;">
+                    <div class="notification-icon">
+                      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <div class="notification-content">
+                      <div style="font-weight: 600; color: var(--color-text-primary); font-size: 1.05rem;">Email Notifications</div>
+                      <div style="font-size: 0.85rem; color: var(--color-text-muted); margin-top: 0.25rem;">Receive daily summaries and critical alerts via email.</div>
+                    </div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                
+                <!-- Push Notifications -->
+                <div class="notification-card">
+                  <div style="display: flex; align-items: center; flex: 1;">
+                    <div class="notification-icon">
+                      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                    </div>
+                    <div class="notification-content">
+                      <div style="font-weight: 600; color: var(--color-text-primary); font-size: 1.05rem;">Push Notifications</div>
+                      <div style="font-size: 0.85rem; color: var(--color-text-muted); margin-top: 0.25rem;">Receive real-time alerts in the browser.</div>
+                    </div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                
+                <!-- Maintenance Alerts -->
+                <div class="notification-card">
+                  <div style="display: flex; align-items: center; flex: 1;">
+                    <div class="notification-icon">
+                      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                    </div>
+                    <div class="notification-content">
+                      <div style="font-weight: 600; color: var(--color-text-primary); font-size: 1.05rem;">Maintenance Alerts</div>
+                      <div style="font-size: 0.85rem; color: var(--color-text-muted); margin-top: 0.25rem;">Get notified when vehicles are due for service.</div>
+                    </div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="js/config.js" defer></script>
+  <script src="js/store.js" defer></script>
+  <script src="js/utils/ui-components.js" defer></script>
+  <script src="js/services/api.js" defer></script>
+  <script src="js/services/auth.js" defer></script>
+  <script src="js/pages/settings.js" defer></script>
+</body>
+</html>

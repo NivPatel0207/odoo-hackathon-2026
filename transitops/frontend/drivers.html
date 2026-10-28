@@ -15,11 +15,12 @@
       <header class="app-header">
         <div class="header-title">Driver Management</div>
         <div class="header-actions">
-          <button class="btn btn-primary" onclick="modal.open('driver-modal')" id="btn-add-driver">+ Register Driver</button>
+          <button class="btn btn-secondary" onclick="openPerformanceModal()" id="btn-perf-dashboard">📊 Performance Dashboard</button>
+          <button class="btn btn-primary" onclick="openNewDriverModal()" id="btn-add-driver">+ Register Driver</button>
         </div>
       </header>
 
-      <main class="page-content">
+      <main class="page-content" role="main">
         <div class="filter-bar">
           <div class="search-input-wrapper">
             <span class="search-icon">🔍</span>
@@ -44,6 +45,8 @@
                   <th>Category</th>
                   <th>Expiry Date</th>
                   <th>Safety Score</th>
+                  <th>Compensation</th>
+                  <th>KYC Status</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
@@ -62,7 +65,7 @@
   <div id="driver-modal" class="modal-backdrop hidden">
     <div class="modal">
       <h2 class="modal-title">Register Driver</h2>
-      <form id="driver-form">
+      <form id="driver-form" aria-label="Driver Form">
         <input type="hidden" id="driver-id">
         <div class="form-grid">
           <div class="form-group">
@@ -89,11 +92,34 @@
           </div>
           <div class="form-group">
             <label class="form-label">Contact Number</label>
-            <input type="text" id="d-contact" class="form-input">
+            <input type="text" id="d-contact" class="form-input" required>
           </div>
           <div class="form-group" id="d-score-group">
             <label class="form-label">Safety Score (0-100)</label>
             <input type="number" id="d-score" class="form-input" min="0" max="100" value="100">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Payment Structure</label>
+            <select id="d-payment-type" class="form-select" required>
+              <option value="monthly">Monthly Salary</option>
+              <option value="per_trip">Per Trip Flat Rate</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" id="d-payment-amount-label">Payment Amount (₹ / Month)</label>
+            <input type="number" id="d-payment-amount" class="form-input" min="0" required>
+          </div>
+          <div class="form-group" style="grid-column: span 2;">
+            <label class="form-label">Government KYC (Aadhar)</label>
+            <div class="flex gap-4" style="align-items: flex-start;">
+              <input type="text" id="d-aadhar" class="form-input" placeholder="12-digit Aadhar Number" style="flex: 1; min-width: 0;" required>
+              <input type="hidden" id="d-aadhar-verified" value="false">
+              <button type="button" id="btn-verify-kyc" class="btn btn-secondary" onclick="verifyKYC()">Verify via Central DB</button>
+            </div>
+            <small id="kyc-hint" class="text-muted" style="font-size: 0.75rem; margin-top: 4px; display: block;">Verification required before assignment.</small>
+          </div>
+          <div style="grid-column: span 2; padding: 0.75rem 1rem; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: var(--radius-sm); font-size: 0.8rem; color: var(--color-accent-blue);">
+            ⚡ <strong>Automated Login Generation:</strong> Driver Portal account is automatically generated with Login ID <code>driver.&lt;license&gt;@transitops.com</code> and password <code>Transit@2026</code>.
           </div>
         </div>
         <div class="modal-footer">
@@ -104,8 +130,96 @@
     </div>
   </div>
 
-  <script src="js/api.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/drivers.js"></script>
+  <!-- Driver Credentials Modal -->
+  <div id="credentials-modal" class="modal-backdrop hidden">
+    <div class="modal" style="max-width: 520px; width: 90%;">
+      <div style="text-align: center; margin-bottom: 1.5rem;">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); color: var(--color-success); display: inline-flex; align-items: center; justify-content: center; font-size: 1.75rem; margin-bottom: 0.75rem; border: 1px solid rgba(16, 185, 129, 0.3);">
+          ✓
+        </div>
+        <h2 class="modal-title" style="margin-bottom: 0.25rem;">Driver Account Generated</h2>
+        <p style="color: var(--color-text-muted); font-size: 0.875rem;">
+          Driver profile and portal login credentials have been created automatically. Share these details with the driver.
+        </p>
+      </div>
+
+      <div style="background: var(--color-bg-card-hover); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem;">
+        <div style="margin-bottom: 1rem;">
+          <label style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted); display: block; margin-bottom: 0.25rem;">Driver Name</label>
+          <div id="cred-driver-name" style="font-weight: 600; color: var(--color-text-primary); font-size: 1rem;"></div>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          <label style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted); display: block; margin-bottom: 0.25rem;">Login ID / Email</label>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <input type="text" id="cred-driver-email" class="form-input" readonly style="font-family: monospace; background: var(--color-bg-input); font-size: 0.9rem;">
+            <button type="button" class="btn btn-secondary" onclick="copyCredField('cred-driver-email', this)" style="white-space: nowrap; height: 38px;">📋 Copy</button>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted); display: block; margin-bottom: 0.25rem;">Temporary Password</label>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <input type="text" id="cred-driver-password" class="form-input" readonly style="font-family: monospace; background: var(--color-bg-input); font-weight: 600; color: var(--color-primary); font-size: 0.95rem;">
+            <button type="button" class="btn btn-secondary" onclick="copyCredField('cred-driver-password', this)" style="white-space: nowrap; height: 38px;">📋 Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 0.8rem; color: var(--color-text-muted);">Access: <strong>Driver Portal</strong></span>
+        <button type="button" class="btn btn-primary" onclick="modal.close('credentials-modal')">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Documents Modal (Back-Office) -->
+  <div id="docs-modal" class="modal-backdrop hidden">
+    <div class="modal" style="max-width: 800px; width: 90%;">
+      <h2 class="modal-title">Driver Documents</h2>
+      <div id="docs-modal-content">
+        <!-- Rendered by JS -->
+      </div>
+      <div class="modal-footer" style="margin-top: 1rem;">
+        <button type="button" class="btn btn-primary" onclick="modal.close('docs-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Performance Modal -->
+  <div id="performance-modal" class="modal-backdrop hidden">
+    <div class="modal" style="max-width: 800px; width: 90%;">
+      <h2 class="modal-title">Driver Performance Dashboard</h2>
+      <div class="table-wrapper" style="max-height: 400px; overflow-y: auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Driver</th>
+              <th>Total Trips</th>
+              <th>Distance (km)</th>
+              <th>Revenue (₹)</th>
+              <th>Fuel Efficiency (L/km)</th>
+              <th>Safety Score</th>
+            </tr>
+          </thead>
+          <tbody id="performance-table-body">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer" style="margin-top: 1rem;">
+        <button type="button" class="btn btn-primary" onclick="modal.close('performance-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config.js" defer></script>
+  <script src="js/store.js" defer></script>
+  <script src="js/utils/debounce.js" defer></script>
+  <script src="js/services/offline.js" defer></script>
+  <script src="js/utils/ui-components.js" defer></script>
+  <script src="js/services/api.js?v=1785860185879" defer></script>
+  <script src="js/services/auth.js?v=1785860185879" defer></script>
+  <script src="js/pages/drivers.js?v=1785864000000" defer></script>
 </body>
 </html>

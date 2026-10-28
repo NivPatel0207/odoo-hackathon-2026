@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Duty & Hours | TransitOps Driver</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .page-title { font-family: 'Outfit', sans-serif; font-weight: 700; }
+    
+    .premium-card {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .status-display {
+      text-align: center;
+      padding: 24px;
+      border-radius: 24px;
+      margin-bottom: 32px;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: all 0.3s ease;
+    }
+
+    .status-display h2 {
+      font-family: 'Outfit';
+      font-size: 3rem;
+      font-weight: 800;
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .status-display p {
+      color: rgba(255,255,255,0.6);
+      margin-top: 8px;
+      font-size: 1.1rem;
+    }
+
+    /* Colors */
+    .status-OFF_DUTY { background: rgba(107, 114, 128, 0.1); border-color: rgba(107, 114, 128, 0.4); color: #9ca3af; }
+    .status-SLEEPER { background: rgba(168, 85, 247, 0.1); border-color: rgba(168, 85, 247, 0.4); color: #c084fc; }
+    .status-DRIVING { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.4); color: #4ade80; box-shadow: 0 0 30px rgba(34,197,94,0.1); }
+    .status-ON_DUTY { background: rgba(234, 179, 8, 0.1); border-color: rgba(234, 179, 8, 0.4); color: #facc15; }
+
+    .timers-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .timer-card {
+      background: rgba(0,0,0,0.2);
+      border-radius: 20px;
+      padding: 24px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .timer-label {
+      font-size: 0.9rem;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    .timer-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .status-btn {
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.03);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Outfit';
+      font-size: 1.1rem;
+    }
+    
+    .status-btn:hover { background: rgba(255,255,255,0.1); }
+    .status-btn.active { border-width: 2px; }
+
+    .btn-off { border-color: rgba(107, 114, 128, 0.5); }
+    .btn-off:hover, .btn-off.active { background: rgba(107, 114, 128, 0.2); }
+    
+    .btn-sb { border-color: rgba(168, 85, 247, 0.5); }
+    .btn-sb:hover, .btn-sb.active { background: rgba(168, 85, 247, 0.2); }
+    
+    .btn-drv { border-color: rgba(34, 197, 94, 0.5); }
+    .btn-drv:hover, .btn-drv.active { background: rgba(34, 197, 94, 0.2); }
+    
+    .btn-on { border-color: rgba(234, 179, 8, 0.5); }
+    .btn-on:hover, .btn-on.active { background: rgba(234, 179, 8, 0.2); }
+
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main-content">
+      <header class="app-header">
+        <div class="header-left">
+          <h1 class="page-title">Duty & Hours</h1>
+        </div>
+      </header>
+      <main class="page-content">
+
+        <div class="premium-card">
+          <div id="main-status-display" class="status-display status-OFF_DUTY">
+            <h2 id="current-status-text">OFF DUTY</h2>
+            <p id="current-status-duration">Since --:--</p>
+          </div>
+
+          <div class="timers-grid">
+            <div class="timer-card">
+              <div class="timer-label">Drive Remaining</div>
+              <div class="timer-value" id="drive-time">11:00</div>
+              <div style="font-size:0.8rem; color:var(--color-text-muted); margin-top:8px;">of 11:00 allowed</div>
+            </div>
+            <div class="timer-card">
+              <div class="timer-label">Shift Remaining</div>
+              <div class="timer-value" id="shift-time">14:00</div>
+              <div style="font-size:0.8rem; color:var(--color-text-muted); margin-top:8px;">of 14:00 allowed</div>
+            </div>
+          </div>
+
+          <h3 style="font-family: 'Outfit'; margin-bottom: 16px; color: var(--color-text-muted);">Change Duty Status</h3>
+          <div class="action-grid">
+            <button class="status-btn btn-off" onclick="changeStatus('OFF_DUTY')" id="btn-OFF_DUTY">OFF</button>
+            <button class="status-btn btn-sb" onclick="changeStatus('SLEEPER')" id="btn-SLEEPER">SB</button>
+            <button class="status-btn btn-drv" onclick="changeStatus('DRIVING')" id="btn-DRIVING">DRV</button>
+            <button class="status-btn btn-on" onclick="changeStatus('ON_DUTY')" id="btn-ON_DUTY">ON</button>
+          </div>
+        </div>
+
+
+      </main>
+    </div>
+  </div>
+
+  <script src="js/config.js" defer></script>
+  <script src="js/store.js" defer></script>
+  <script src="js/utils/ui-components.js" defer></script>
+  <script src="js/services/api.js" defer></script>
+  <script src="js/services/auth.js" defer></script>
+  <script src="js/pages/driver-duty.js" defer></script>
+</body>
+</html>

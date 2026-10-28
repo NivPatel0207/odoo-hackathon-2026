@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const applyBaseSchema = require('../utils/applyBaseSchema');
 
 const MaintenanceSchema = new mongoose.Schema({
   vehicle: {
@@ -36,7 +37,14 @@ const MaintenanceSchema = new mongoose.Schema({
   notes: {
     type: String,
     trim: true
+  },
+  reportedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
   }
 }, { timestamps: true });
+
+applyBaseSchema(MaintenanceSchema);
 
 module.exports = mongoose.model('Maintenance', MaintenanceSchema);

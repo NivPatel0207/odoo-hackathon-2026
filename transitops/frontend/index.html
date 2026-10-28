@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,51 +8,78 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/components.css">
 </head>
+
 <body>
   <div class="auth-page">
     <div class="auth-left">
-      <div class="auth-hero-logo">
-        <div class="auth-logo-icon">🚚</div>
-        <div class="auth-brand">Transit<span>Ops</span></div>
-      </div>
-      <h1 class="auth-headline">Smart Transport<br>Operations <span class="highlight">Platform</span></h1>
-      <p class="auth-subline">Digitize the full lifecycle of your fleet operations with real-time tracking, intelligent rule enforcement, and comprehensive expense management.</p>
-      
-      <div class="auth-features">
-        <div class="auth-feature">
-          <span class="auth-feature-icon">🛡️</span>
-          <span class="auth-feature-text">Hard business rules prevent unsafe dispatch</span>
+      <!-- Added a dark gradient overlay and padding to make text extremely readable against the 3D background -->
+      <div class="auth-left-content"
+        style="position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; justify-content: center; background: linear-gradient(to right, rgba(10, 14, 26, 0.9) 0%, rgba(10, 14, 26, 0.2) 100%); padding: 0 4rem; margin: 0 -4rem; --color-text-primary: #ffffff; --color-text-secondary: rgba(255, 255, 255, 0.85);">
+        <div class="auth-left-orb1"></div>
+        <div class="auth-left-orb2"></div>
+        <div class="auth-hero-logo">
+          <div class="auth-logo-icon">🚚</div>
+          <div class="auth-brand">Transit<span>Ops</span></div>
         </div>
-        <div class="auth-feature">
-          <span class="auth-feature-icon">📊</span>
-          <span class="auth-feature-text">Real-time operational ROI and fleet utilization</span>
-        </div>
-        <div class="auth-feature">
-          <span class="auth-feature-icon">🔒</span>
-          <span class="auth-feature-text">Role-based access for your entire team</span>
+        <h1 class="auth-headline">Smart Transport<br>Operations <span class="highlight">Platform</span></h1>
+        <p class="auth-subline">Digitize the full lifecycle of your fleet operations with real-time tracking,
+          intelligent rule enforcement, and comprehensive expense management.</p>
+
+        <div class="auth-features">
+          <div class="auth-feature">
+            <span class="auth-feature-icon">🛡️</span>
+            <span class="auth-feature-text">Hard business rules prevent unsafe dispatch</span>
+          </div>
+          <div class="auth-feature">
+            <span class="auth-feature-icon">📊</span>
+            <span class="auth-feature-text">Real-time operational ROI and fleet utilization</span>
+          </div>
+          <div class="auth-feature">
+            <span class="auth-feature-icon">🔒</span>
+            <span class="auth-feature-text">Role-based access for your entire team</span>
+          </div>
         </div>
       </div>
     </div>
-    
+
     <div class="auth-right">
-      <div class="auth-form-container">
+      <!-- LOGIN VIEW -->
+      <div id="login-view" class="auth-form-container">
         <h2 class="auth-form-title">Welcome back</h2>
         <p class="auth-form-subtitle">Sign in to your account to continue</p>
-        
-        <form id="login-form">
-          <div class="form-group">
-            <label class="form-label">Email address</label>
-            <input type="email" id="email" class="form-input" placeholder="manager@transitops.com" required>
+
+        <form id="login-form" aria-label="Login Form">
+          <div class="form-floating">
+            <input type="email" id="email" class="form-input" placeholder=" " required aria-label="Email address">
+            <label for="email">Email address</label>
           </div>
-          <div class="form-group">
-            <label class="form-label">Password</label>
-            <input type="password" id="password" class="form-input" placeholder="••••••••" required>
+          <div class="form-floating">
+            <input type="password" id="password" class="form-input password-input" placeholder=" " required
+              aria-label="Password">
+            <label for="password">Password</label>
+            <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('password', this)"
+              aria-label="Toggle password visibility">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
           </div>
-          <button type="submit" class="btn btn-primary w-full mt-4" style="height: 48px; font-size: 1rem;">Sign In</button>
+          <div style="text-align: right; margin-top: -0.5rem; margin-bottom: 1rem;">
+            <a href="#" onclick="toggleView('forgot-password'); return false;"
+              style="font-size: 0.85rem; color: var(--color-primary); text-decoration: none;">Forgot Password?</a>
+          </div>
+          <button type="submit" class="btn btn-primary w-full mt-2" style="height: 48px; font-size: 1rem;">Sign
+            In</button>
         </form>
 
         <div class="auth-demo-accounts">
-          <div class="auth-demo-title">Demo Credentials (Password: password123)</div>
+          <div class="auth-demo-title">Quick Demo Sign-In</div>
+          <div class="demo-account" onclick="fillLogin('nivpatel0207@gmail.com', 'niv.7600964611')">
+            <span class="demo-email">nivpatel0207@gmail.com</span>
+            <span class="demo-role">Niv (Lead Mgr)</span>
+          </div>
           <div class="demo-account" onclick="fillLogin('manager@transitops.com')">
             <span class="demo-email">manager@transitops.com</span>
             <span class="demo-role">Fleet Mgr</span>
@@ -70,43 +98,284 @@
           </div>
         </div>
       </div>
+
+
+      <!-- FORGOT PASSWORD VIEW -->
+      <div id="forgot-password-view" class="auth-form-container hidden">
+        <h2 class="auth-form-title">Reset Password</h2>
+        <p class="auth-form-subtitle">Enter your email to receive a reset link</p>
+
+        <form id="forgot-password-form" aria-label="Forgot Password Form">
+          <div class="form-floating">
+            <input type="email" id="forgot-email" class="form-input" placeholder=" " required
+              aria-label="Email address">
+            <label for="forgot-email">Email address</label>
+          </div>
+          <button type="submit" class="btn btn-primary w-full mt-4" style="height: 48px; font-size: 1rem;">Send Reset
+            Link</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem;">
+          <a href="#" onclick="toggleView('login'); return false;"
+            style="color: var(--color-text-muted); text-decoration: none; font-weight: 500;">← Back to Sign In</a>
+        </div>
+      </div>
+
+      <!-- RESET PASSWORD VIEW -->
+      <div id="reset-password-view" class="auth-form-container hidden">
+        <h2 class="auth-form-title">Set New Password</h2>
+        <p class="auth-form-subtitle">Enter your new password below</p>
+
+        <form id="reset-password-form" aria-label="Reset Password Form">
+          <div class="form-floating">
+            <input type="password" id="reset-password" class="form-input password-input" placeholder=" " required
+              aria-label="New Password">
+            <label for="reset-password">New Password</label>
+            <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('reset-password', this)"
+              aria-label="Toggle password visibility">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+          <div class="form-floating">
+            <input type="password" id="reset-confirm-password" class="form-input password-input" placeholder=" "
+              required aria-label="Confirm Password">
+            <label for="reset-confirm-password">Confirm Password</label>
+            <button type="button" class="password-toggle-btn"
+              onclick="togglePasswordVisibility('reset-confirm-password', this)"
+              aria-label="Toggle password visibility">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+          <button type="submit" class="btn btn-primary w-full mt-4" style="height: 48px; font-size: 1rem;">Update
+            Password</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem;">
+          <a href="index.html" style="color: var(--color-text-muted); text-decoration: none; font-weight: 500;">← Back
+            to Login</a>
+        </div>
+      </div>
+
+      <!-- 2FA VIEW -->
+      <div id="two-factor-view" class="auth-form-container hidden">
+        <h2 class="auth-form-title">Security Check</h2>
+        <p class="auth-form-subtitle">Enter the 6-digit code sent to your device</p>
+
+        <form id="two-factor-form" aria-label="Two Factor Authentication Form">
+          <div class="form-floating" style="text-align: center;">
+            <input type="text" id="tfa-code" class="form-input" placeholder=" " required pattern="[0-9]{6}"
+              maxlength="6" autocomplete="one-time-code"
+              style="text-align: center; font-size: 1.5rem; letter-spacing: 0.5rem; font-weight: 600;">
+            <label for="tfa-code" style="left: 0; right: 0; text-align: center;">6-Digit Code</label>
+          </div>
+          <button type="submit" class="btn btn-primary w-full mt-4" style="height: 48px; font-size: 1rem;">Verify &
+            Login</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem;">
+          <a href="#" onclick="toggleView('login'); return false;"
+            style="color: var(--color-text-muted); text-decoration: none; font-weight: 500;">← Back to Login</a>
+        </div>
+      </div>
     </div>
   </div>
 
-  <script src="js/api.js"></script>
-  <script src="js/auth.js"></script>
+  <script src="js/utils/ui-components.js" defer></script>
+  <script src="js/services/api.js" defer></script>
+  <script src="js/services/auth.js" defer></script>
   <script>
-    // Redirect if already logged in
-    if (localStorage.getItem('transitops_token')) {
-      window.location.href = 'dashboard.html';
+    function togglePasswordVisibility(inputId, btnElement) {
+      const input = document.getElementById(inputId);
+      const isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+
+      if (isPassword) {
+        btnElement.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+      } else {
+        btnElement.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+      }
     }
 
-    function fillLogin(email) {
+
+
+    // Redirect if already logged in (wait for auth.js to load)
+    document.addEventListener('DOMContentLoaded', () => {
+      const cachedUser = auth.getUser();
+      if (localStorage.getItem('transitops_token') && cachedUser) {
+        window.location.href = auth.redirectHome(cachedUser.role);
+      }
+    });
+
+    function fillLogin(email, pwd = 'password123') {
       document.getElementById('email').value = email;
-      document.getElementById('password').value = 'password123';
+      document.getElementById('password').value = pwd;
+      // Trigger input events for floating labels
+      document.getElementById('email').dispatchEvent(new Event('input'));
+      document.getElementById('password').dispatchEvent(new Event('input'));
     }
+
+    // Check for reset token in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const resetToken = urlParams.get('reset_token');
+    const resetId = urlParams.get('id');
+
+    function toggleView(view) {
+      document.getElementById('login-view').classList.add('hidden');
+
+      document.getElementById('forgot-password-view').classList.add('hidden');
+      document.getElementById('reset-password-view').classList.add('hidden');
+      document.getElementById('two-factor-view').classList.add('hidden');
+
+      document.getElementById(view + '-view').classList.remove('hidden');
+    }
+
+    if (resetToken && resetId) {
+      toggleView('reset-password');
+      document.getElementById('reset-password-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const pwd = document.getElementById('reset-password').value;
+        const confirm = document.getElementById('reset-confirm-password').value;
+
+        if (pwd !== confirm) {
+          toast.error('Passwords do not match');
+          return;
+        }
+
+        try {
+          loading.show();
+          const res = await api.resetPassword({ token: resetToken, userId: resetId, password: pwd });
+          if (res.success) {
+            toast.success('Password updated successfully');
+            setTimeout(() => {
+              window.location.href = 'index.html';
+            }, 2000);
+          } else {
+            toast.error(res.message);
+          }
+        } catch (err) {
+          toast.error('Failed to reset password', err.message);
+        } finally {
+          loading.hide();
+        }
+      });
+    }
+
+    let pendingAuthData = null;
 
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
-      const btn = e.target.querySelector('button');
-      
+
       try {
-        btn.disabled = true;
-        btn.innerHTML = 'Signing in...';
+        loading.show();
         const res = await api.login({ email, password });
         if (res.success) {
-          auth.save(res.token, res.user);
-          window.location.href = 'dashboard.html';
+          pendingAuthData = res;
+          toggleView('two-factor');
+          setTimeout(() => document.getElementById('tfa-code').focus(), 100);
         }
       } catch (err) {
         toast.error('Login Failed', err.message);
       } finally {
-        btn.disabled = false;
-        btn.innerHTML = 'Sign In';
+        loading.hide();
+      }
+    });
+
+    document.getElementById('two-factor-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const code = document.getElementById('tfa-code').value;
+
+      // Mock 2FA validation
+      if (code.length === 6) {
+        if (pendingAuthData) {
+          auth.save(pendingAuthData.token, pendingAuthData.user);
+          if (typeof api.logAction === 'function') api.logAction('User Login with 2FA');
+          window.location.href = auth.redirectHome(pendingAuthData.user.role);
+        }
+      } else {
+        toast.error('Invalid code. Please try again.');
+      }
+    });
+
+
+
+    document.getElementById('forgot-password-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('forgot-email').value;
+
+      try {
+        loading.show();
+        const res = await api.forgotPassword({ email });
+        if (res.success) {
+          toast.success('Reset link sent to your email');
+          setTimeout(() => toggleView('login'), 2000);
+        } else {
+          toast.error(res.message);
+        }
+      } catch (err) {
+        toast.error('Failed to send reset link', err.message);
+      } finally {
+        loading.hide();
+      }
+    });
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const authLeft = document.querySelector('.auth-left');
+      if (authLeft) {
+        const vantaEffect = VANTA.NET({
+          el: authLeft,
+          mouseControls: true,
+          touchControls: true,
+          gyroControls: false,
+          minHeight: 200.00,
+          minWidth: 200.00,
+          scale: 1.00,
+          scaleMobile: 1.00,
+          color: 0xf59e0b, // Amber primary
+          backgroundColor: 0x0a0e1a, // Dark background
+          points: 12.00,
+          maxDistance: 22.00,
+          spacing: 18.00,
+          showDots: true
+        });
+
+        // Ensure canvas stays in background behind content
+        const vantaCanvas = authLeft.querySelector('canvas.vanta-canvas');
+        if (vantaCanvas) {
+            vantaCanvas.style.zIndex = 0;
+            vantaCanvas.style.position = 'absolute';
+        }
+
+        // Force a resize after layout paints to ensure 100% accurate dimensions
+        setTimeout(() => {
+          if(vantaEffect && typeof vantaEffect.resize === 'function') {
+             vantaEffect.resize();
+          }
+        }, 100);
+        
+        // Also observe resizes to fix any edge cases
+        if (window.ResizeObserver) {
+          const ro = new ResizeObserver(() => {
+            if(vantaEffect && typeof vantaEffect.resize === 'function') vantaEffect.resize();
+          });
+          ro.observe(authLeft);
+        }
       }
     });
   </script>
 </body>
+
 </html>

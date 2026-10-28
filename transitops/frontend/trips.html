@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,27 +8,96 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/components.css">
 </head>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trips | TransitOps</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+</head>
+
 <body>
   <div class="app-layout">
     <aside class="sidebar" id="sidebar"></aside>
-    
+
     <div class="main-content">
       <header class="app-header">
-        <div class="header-title">Trip Management</div>
-        <div class="header-actions">
-          <button class="btn btn-primary" onclick="openCreateModal()" id="btn-create-trip">+ Create Draft Trip</button>
+        <div class="header-title">Trips Management</div>
+        <div class="flex gap-3">
+          <button class="btn btn-primary" onclick="openCreateModal()" id="btn-create-trip">+ Create Trip</button>
         </div>
       </header>
 
-      <main class="page-content">
-        <div class="filter-bar">
-          <select id="filter-status" class="form-select" style="width: 200px;">
-            <option value="">All Statuses</option>
-            <option value="draft">Draft</option>
-            <option value="dispatched">Dispatched</option>
-            <option value="completed">Completed</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
+      <main class="page-content" role="main" role="main">
+        <!-- Dashboard Stats Cards -->
+        <div class="stats-grid" id="trip-stats-grid">
+          <div class="stat-card accent-primary">
+            <div class="stat-title">Total Trips</div>
+            <div class="stat-value" id="stat-total">0</div>
+          </div>
+          <div class="stat-card accent-info">
+            <div class="stat-title">Running (In Transit)</div>
+            <div class="stat-value" id="stat-running">0</div>
+          </div>
+          <div class="stat-card accent-success">
+            <div class="stat-title">Completed</div>
+            <div class="stat-value" id="stat-completed">0</div>
+          </div>
+          <div class="stat-card accent-danger">
+            <div class="stat-title">Delayed</div>
+            <div class="stat-value" id="stat-delayed">0</div>
+          </div>
+        </div>
+
+        <!-- Advanced Filter Bar -->
+        <div class="filter-bar advanced" id="advanced-filters">
+          <div class="filter-group">
+            <label>Search Trip ID</label>
+            <input type="text" id="filter-search" class="form-input" placeholder="e.g. TRIP-0001">
+          </div>
+          <div class="filter-group">
+            <label>Status</label>
+            <select id="filter-status" class="form-select">
+              <option value="">All Statuses</option>
+              <option value="draft">Draft</option>
+              <option value="assigned">Assigned</option>
+              <option value="accepted">Accepted</option>
+              <option value="loading">Loading</option>
+              <option value="dispatched">Dispatched</option>
+              <option value="in_transit">In Transit</option>
+              <option value="arrived">Arrived</option>
+              <option value="delivered">Delivered</option>
+              <option value="completed">Completed</option>
+              <option value="delayed">Delayed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Priority</label>
+            <select id="filter-priority" class="form-select">
+              <option value="">All Priorities</option>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="urgent">Urgent</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Date Range (Start)</label>
+            <input type="date" id="filter-start-date" class="form-input">
+          </div>
+          <div class="filter-group">
+            <label>Date Range (End)</label>
+            <input type="date" id="filter-end-date" class="form-input">
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn-ghost" id="btn-reset-filters">Reset</button>
+            <button class="btn btn-primary" id="btn-apply-filters">Apply Filters</button>
+          </div>
         </div>
 
         <div class="card p-0">
@@ -35,11 +105,12 @@
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>Trip Code</th>
-                  <th>Route</th>
+                  <th>Trip ID & Date</th>
+                  <th>Route (Pickup → Dest)</th>
                   <th>Vehicle & Driver</th>
-                  <th>Cargo</th>
-                  <th>Status</th>
+                  <th>Distance & ETA</th>
+                  <th>Priority & Cargo</th>
+                  <th>Status & Progress</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -55,26 +126,46 @@
 
   <!-- Create/Edit Trip Modal -->
   <div id="trip-modal" class="modal-backdrop hidden">
-    <div class="modal">
+    <div class="modal" style="max-width: 700px; width: 90%;">
       <h2 class="modal-title">Trip Details</h2>
-      <form id="trip-form">
+      <form id="trip-form" aria-label="Trip Form">
         <input type="hidden" id="t-id">
-        <div class="form-grid">
+
+        <datalist id="city-suggestions">
+          <option value="Delhi">
+          <option value="Mumbai">
+          <option value="Bangalore">
+          <option value="Chennai">
+          <option value="Kolkata">
+          <option value="Hyderabad">
+          <option value="Pune">
+          <option value="Ahmedabad">
+          <option value="Jaipur">
+          <option value="Surat">
+          <option value="Lucknow">
+          <option value="Kanpur">
+          <option value="Nagpur">
+          <option value="Indore">
+          <option value="Bhopal">
+        </datalist>
+
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
           <div class="form-group">
             <label class="form-label">Source Location</label>
-            <input type="text" id="t-source" class="form-input" required>
+            <input type="text" id="t-source" class="form-input" list="city-suggestions" autocomplete="off" required>
           </div>
           <div class="form-group">
             <label class="form-label">Destination</label>
-            <input type="text" id="t-destination" class="form-input" required>
+            <input type="text" id="t-destination" class="form-input" list="city-suggestions" autocomplete="off"
+              required>
           </div>
-          <div class="form-group col-span-12">
-            <label class="form-label">Assign Vehicle</label>
-            <select id="t-vehicle" class="form-select" required></select>
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label class="form-label">Assign Vehicle (Optional)</label>
+            <select id="t-vehicle" class="form-select"></select>
           </div>
-          <div class="form-group col-span-12">
-            <label class="form-label">Assign Driver</label>
-            <select id="t-driver" class="form-select" required></select>
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label class="form-label">Assign Driver (Optional)</label>
+            <select id="t-driver" class="form-select"></select>
           </div>
           <div class="form-group">
             <label class="form-label">Cargo Weight (kg)</label>
@@ -83,6 +174,19 @@
           <div class="form-group">
             <label class="form-label">Planned Distance (km)</label>
             <input type="number" id="t-distance" class="form-input" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Priority</label>
+            <select id="t-priority" class="form-select" required>
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+              <option value="urgent">Urgent</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">ETA (Expected Arrival)</label>
+            <input type="datetime-local" id="t-eta" class="form-input">
           </div>
         </div>
         <div class="modal-footer">
@@ -93,12 +197,55 @@
     </div>
   </div>
 
-  <!-- Complete Trip Modal -->
-  <div id="complete-modal" class="modal-backdrop hidden">
+  <!-- Update Status Modal (Quick More Menu equivalent) -->
+  <div id="status-modal" class="modal-backdrop hidden">
     <div class="modal" style="max-width: 400px;">
-      <h2 class="modal-title">Complete Trip</h2>
-      <form id="complete-form">
+      <h2 class="modal-title">Update Trip Status</h2>
+      <form id="status-form" aria-label="Status Form">
+        <input type="hidden" id="s-id">
+        <div class="form-group">
+          <label class="form-label">New Status</label>
+          <select id="s-status" class="form-select" required>
+            <option value="draft">Draft</option>
+            <option value="assigned">Assigned</option>
+            <option value="accepted">Accepted</option>
+            <option value="loading">Loading</option>
+            <option value="dispatched">Dispatched</option>
+            <option value="in_transit">In Transit</option>
+            <option value="arrived">Arrived</option>
+            <option value="delivered">Delivered</option>
+            <option value="delayed">Delayed</option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="modal.close('status-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update Status</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- View Trip Modal -->
+  <div id="view-modal" class="modal-backdrop hidden">
+    <div class="modal" style="max-width: 600px;">
+      <h2 class="modal-title" id="view-title">Trip Details</h2>
+      <div id="view-content"
+        style="color: var(--color-text-secondary); line-height: 1.6; margin-bottom: var(--space-4);">
+        <!-- Populated by JS -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="modal.close('view-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Complete Trip & ePOD Modal -->
+  <div id="complete-modal" class="modal-backdrop hidden">
+    <div class="modal" style="max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;">
+      <h2 class="modal-title">Complete Delivery</h2>
+      <form id="complete-form" aria-label="Complete Form">
         <input type="hidden" id="c-id">
+
         <div class="form-group">
           <label class="form-label">Actual Distance (km)</label>
           <input type="number" id="c-distance" class="form-input" min="0" required>
@@ -107,11 +254,66 @@
           <label class="form-label">Fuel Consumed (Liters)</label>
           <input type="number" id="c-fuel" class="form-input" min="0" step="0.1" required>
         </div>
-        <div class="form-group">
+        <div class="form-group" id="revenue-group">
           <label class="form-label">Generated Revenue (₹)</label>
           <input type="number" id="c-revenue" class="form-input" min="0" required>
         </div>
-        <div class="modal-footer">
+
+        <!-- Electronic Proof of Delivery (ePOD) Section -->
+        <div id="epod-section"
+          style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--color-border); display: none;">
+          <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: var(--color-text-primary);">
+            Electronic Proof of Delivery (ePOD)</h3>
+
+          <div class="form-group">
+            <label class="form-label">Recipient Name</label>
+            <input type="text" id="c-epod-recipient" class="form-input" placeholder="Name of person receiving goods">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Quantity Delivered (Packages/Items)</label>
+            <input type="number" id="c-epod-qty" class="form-input" min="1">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Condition</label>
+            <div class="flex gap-4">
+              <label class="flex items-center gap-2" style="color: var(--color-text-secondary);">
+                <input type="radio" name="c-epod-condition" value="Good" checked> Good
+              </label>
+              <label class="flex items-center gap-2" style="color: var(--color-text-secondary);">
+                <input type="radio" name="c-epod-condition" value="Damaged"> Damaged
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Customer Signature</label>
+            <div
+              style="border: 1px solid var(--color-border); border-radius: var(--radius-md); background: #ffffff; margin-bottom: 0.5rem;">
+              <canvas id="c-epod-signature-pad" width="400" height="150"
+                style="width: 100%; touch-action: none; display: block; border-radius: var(--radius-md);"></canvas>
+            </div>
+            <button type="button" class="btn btn-ghost" style="padding: 4px 8px; font-size: 0.8rem;"
+              onclick="clearSignature()">Clear Signature</button>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Delivery Photo</label>
+            <div
+              style="border: 1px dashed var(--color-border); padding: 1rem; text-align: center; border-radius: var(--radius-md); background: var(--color-bg-tertiary);">
+              <input type="file" id="c-epod-photo" accept="image/*" capture="environment" style="display: none;"
+                onchange="previewEpodPhoto(this)">
+              <button type="button" class="btn btn-secondary"
+                onclick="document.getElementById('c-epod-photo').click()">+ Add Photo</button>
+              <div id="c-epod-photo-preview" style="margin-top: 1rem; display: none;">
+                <img src="" alt="Preview" style="max-width: 100%; max-height: 150px; border-radius: 4px;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="margin-top: 2rem;">
           <button type="button" class="btn btn-ghost" onclick="modal.close('complete-modal')">Cancel</button>
           <button type="submit" class="btn btn-success">Mark Completed</button>
         </div>
@@ -119,8 +321,16 @@
     </div>
   </div>
 
-  <script src="js/api.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/trips.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr" defer></script>
+  <script src="js/config.js" defer></script>
+  <script src="js/store.js" defer></script>
+  <script src="js/utils/debounce.js" defer></script>
+  <script src="js/services/offline.js" defer></script>
+  <script src="js/utils/ui-components.js" defer></script>
+  <script src="js/services/api.js?v=1785860185879" defer></script>
+  <script src="js/services/auth.js?v=1785860185879" defer></script>
+  <script src="js/pages/trips.js" defer></script>
 </body>
+
 </html>

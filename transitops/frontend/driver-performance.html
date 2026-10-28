@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Performance | TransitOps Driver</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .page-title { font-family: 'Outfit', sans-serif; font-weight: 700; }
+    
+    .premium-card {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .section-header {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--color-text-muted);
+      margin-bottom: 24px;
+    }
+
+    /* Score Ring */
+    .score-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 40px;
+    }
+    
+    .radial-progress {
+      position: relative;
+      width: 200px;
+      height: 200px;
+    }
+    
+    .radial-progress svg {
+      transform: rotate(-90deg);
+      width: 100%;
+      height: 100%;
+    }
+    
+    .progress-bg {
+      fill: none;
+      stroke: rgba(255,255,255,0.05);
+      stroke-width: 12;
+    }
+    
+    .progress-bar {
+      fill: none;
+      stroke: var(--color-primary);
+      stroke-width: 12;
+      stroke-linecap: round;
+      stroke-dasharray: 502; /* 2 * PI * R (R=80) = ~502 */
+      stroke-dashoffset: 502;
+      transition: stroke-dashoffset 1.5s cubic-bezier(0.1, 0.7, 0.1, 1);
+    }
+    
+    .score-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+    
+    .score-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 4rem;
+      font-weight: 700;
+      color: white;
+      line-height: 1;
+    }
+    
+    .score-label {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.9rem;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .stat-box {
+      background: rgba(0,0,0,0.2);
+      padding: 24px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .stat-label {
+      color: var(--color-text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+    }
+    .stat-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2rem;
+      font-weight: 700;
+      color: white;
+    }
+
+    /* Linear Progress Bar for completion */
+    .completion-bar-container {
+      width: 100%;
+      height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      margin-top: 12px;
+      overflow: hidden;
+    }
+    .completion-bar {
+      height: 100%;
+      background: #10b981;
+      width: 0%;
+      transition: width 1s ease-out;
+    }
+    
+    .feedback-list { display: flex; flex-direction: column; gap: 12px; }
+    .feedback-item {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .feedback-icon { color: #10b981; }
+    
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main-content">
+      <header class="app-header">
+        <div class="header-left">
+          <h1 class="page-title">Performance</h1>
+        </div>
+      </header>
+      <main class="page-content">
+
+        <div class="premium-card">
+          <div class="score-container">
+            <div class="radial-progress">
+              <svg viewBox="0 0 200 200">
+                <circle class="progress-bg" cx="100" cy="100" r="80"></circle>
+                <circle class="progress-bar" id="score-ring" cx="100" cy="100" r="80"></circle>
+              </svg>
+              <div class="score-text">
+                <div class="score-val" id="score-val">0</div>
+                <div class="score-label">Safety Score</div>
+              </div>
+            </div>
+            <p style="color: var(--color-text-muted); margin-top: 24px;">Maintain a score above 90 to qualify for the Monthly Safety Bonus.</p>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div class="stat-label">Total Assigned Trips</div>
+              <div class="stat-value" id="stat-total">0</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Completed Trips</div>
+              <div class="stat-value" id="stat-completed">0</div>
+              <div class="completion-bar-container">
+                <div class="completion-bar" id="completion-bar"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="premium-card">
+          <div class="section-header">Recent Feedback</div>
+          <div class="feedback-list" id="feedback-list">
+            <div style="text-align: center; color: var(--color-text-muted); padding: 20px;">No recent feedback found.</div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="js/config.js" defer></script>
+  <script src="js/store.js" defer></script>
+  <script src="js/utils/ui-components.js" defer></script>
+  <script src="js/services/api.js" defer></script>
+  <script src="js/services/auth.js" defer></script>
+  <script src="js/pages/driver-performance.js" defer></script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-
-let tripCounter = 0;
+const crypto = require('crypto');
+const applyBaseSchema = require('../utils/applyBaseSchema');
 
 const TripSchema = new mongoose.Schema({
   tripCode: {
@@ -19,13 +19,36 @@ const TripSchema = new mongoose.Schema({
   },
   vehicle: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Vehicle',
-    required: [true, 'Vehicle is required']
+    ref: 'Vehicle'
+    // Removed required for unassigned loads
   },
   driver: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Driver',
-    required: [true, 'Driver is required']
+    ref: 'Driver'
+    // Removed required for unassigned loads
+  },
+  customerName: {
+    type: String,
+    trim: true
+  },
+  commodityType: {
+    type: String,
+    trim: true
+  },
+  rateType: {
+    type: String,
+    enum: ['flat', 'per_mile'],
+    default: 'flat'
+  },
+  rate: {
+    type: Number,
+    default: 0
+  },
+  pickupTime: {
+    type: Date
+  },
+  deliveryTime: {
+    type: Date
   },
   cargoWeight: {
     type: Number,
@@ -55,24 +78,62 @@ const TripSchema = new mongoose.Schema({
   completedAt: {
     type: Date
   },
+  eta: {
+    type: Date
+  },
+  priority: {
+    type: String,
+    enum: ['low', 'medium', 'high', 'urgent'],
+    default: 'medium'
+  },
   status: {
     type: String,
-    enum: ['draft', 'dispatched', 'completed', 'cancelled'],
+    enum: ['draft', 'assigned', 'accepted', 'loading', 'dispatched', 'in_transit', 'arrived', 'delivered', 'completed', 'delayed', 'cancelled'],
     default: 'draft'
   },
   notes: {
     type: String,
     trim: true
+  },
+  epod: {
+    recipientName: { type: String, trim: true },
+    quantityDelivered: { type: Number, min: 0 },
+    condition: { type: String, enum: ['Good', 'Damaged'] },
+    customerSignature: { type: String }, // Base64 data URL
+    deliveryPhoto: { type: String }, // Base64 data URL
+    capturedAt: { type: Date }
+  },
+  preTripInspection: {
+    brakes: { type: Boolean },
+    engine: { type: Boolean },
+    tyres: { type: Boolean },
+    headlights: { type: Boolean },
+    indicators: { type: Boolean },
+    horn: { type: Boolean },
+    mirrors: { type: Boolean },
+    oil: { type: Boolean },
+    coolant: { type: Boolean },
+    fuel: { type: Boolean },
+    emergencyKit: { type: Boolean },
+    fireExtinguisher: { type: Boolean },
+    documents: { type: Boolean },
+    vehicleCondition: { type: String, enum: ['Safe', 'Minor Issue', 'Unsafe'] },
+    completedAt: { type: Date }
   }
 }, { timestamps: true });
 
 // Auto-generate tripCode before saving
 TripSchema.pre('save', async function (next) {
   if (this.isNew && !this.tripCode) {
-    const count = await mongoose.model('Trip').countDocuments();
-    this.tripCode = `TRIP-${String(count + 1).padStart(4, '0')}`;
+    const uniqueId = crypto.randomUUID().split('-')[0].toUpperCase();
+    this.tripCode = `TRIP-${uniqueId}`;
   }
   next();
 });
+
+applyBaseSchema(TripSchema);
+
+TripSchema.index({ status: 1 });
+TripSchema.index({ scheduledDate: -1 });
 
 module.exports = mongoose.model('Trip', TripSchema);

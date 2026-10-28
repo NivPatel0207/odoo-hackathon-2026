@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team Management | TransitOps</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    
+    <div class="main-content">
+      <header class="app-header">
+        <div class="header-title">Team Management</div>
+        <div class="header-actions">
+          <button class="btn btn-primary" onclick="openNewUserModal()" id="btn-add-user">+ Add Team Member</button>
+        </div>
+      </header>
+
+      <main class="page-content" role="main">
+        <div class="filter-bar">
+          <div class="search-input-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-input" class="form-input" placeholder="Search by name, email, or role...">
+          </div>
+          <select id="filter-role" class="form-select" style="width: auto;">
+            <option value="">All Roles</option>
+            <option value="fleet_manager">Fleet Manager</option>
+            <option value="dispatcher">Dispatcher</option>
+            <option value="safety_officer">Safety Officer</option>
+            <option value="financial_analyst">Financial Analyst</option>
+          </select>
+        </div>
+
+        <div class="card p-0">
+          <div class="table-wrapper" id="team-table">
+            <!-- Populated by JS via TableBuilder -->
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- User Modal -->
+  <div id="user-modal" class="modal-backdrop hidden">
+    <div class="modal">
+      <h2 class="modal-title" id="user-modal-title">Add Team Member</h2>
+      <form id="user-form" aria-label="User Form">
+        <input type="hidden" id="u-id">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" id="u-name" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" id="u-email" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Role</label>
+            <select id="u-role" class="form-select" required>
+              <option value="fleet_manager">Fleet Manager (Full Admin)</option>
+              <option value="dispatcher">Dispatcher (Trips & Routing)</option>
+              <option value="safety_officer">Safety Officer (Drivers & Compliance)</option>
+              <option value="financial_analyst">Financial Analyst (Expenses & Billing)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Monthly Salary (₹)</label>
+            <input type="number" id="u-salary" class="form-input" min="0" placeholder="e.g. 45000">
+          </div>
+          <div class="form-group" id="pwd-group">
+            <label class="form-label">Initial Password <span style="font-weight: 400; font-size: 0.8rem; color: var(--color-text-muted);">(Leave blank to use default)</span></label>
+            <input type="text" id="u-password" class="form-input" placeholder="password123">
+          </div>
+        </div>
+
+        <!-- Login Guidance Callout -->
+        <div style="margin-top: 1.25rem; padding: 0.85rem 1rem; border-radius: 8px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); display: flex; align-items: flex-start; gap: 0.75rem;">
+          <span style="font-size: 1.15rem; line-height: 1.2;">🔑</span>
+          <div style="font-size: 0.85rem; color: var(--color-text-secondary); line-height: 1.4;">
+            <div style="font-weight: 600; color: var(--color-text-primary);">How will this member sign in?</div>
+            <div>The new member can sign in at the login screen using their <strong>email</strong> and the password set above (default: <code style="background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px; font-weight: 600; color: var(--color-primary);">password123</code>). They can update it anytime in Profile or Settings.</div>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="margin-top: 1.25rem;">
+          <button type="button" class="btn btn-ghost" onclick="modal.close('user-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Member</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/config.js" defer></script>
+  <script src="js/store.js" defer></script>
+  <script src="js/utils/debounce.js" defer></script>
+  <script src="js/utils/ui-components.js" defer></script>
+  <script src="js/services/api.js?v=2" defer></script>
+  <script src="js/services/auth.js" defer></script>
+  <script src="js/pages/team.js?v=3" defer></script>
+</body>
+</html>

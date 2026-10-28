@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const mongooseFieldEncryption = require('../utils/encryption').fieldEncryption;
+const applyBaseSchema = require('../utils/applyBaseSchema');
 
 const DriverSchema = new mongoose.Schema({
   name: {
@@ -24,6 +26,7 @@ const DriverSchema = new mongoose.Schema({
   },
   contactNumber: {
     type: String,
+    required: [true, 'Contact number is required'],
     trim: true
   },
   safetyScore: {
@@ -34,13 +37,45 @@ const DriverSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['available', 'on_trip', 'off_duty', 'suspended'],
+    enum: ['available', 'on_trip', 'off_duty', 'suspended', 'draft'],
     default: 'available'
+  },
+  paymentType: {
+    type: String,
+    enum: ['monthly', 'per_trip'],
+    default: 'monthly'
+  },
+  paymentAmount: {
+    type: Number,
+    required: [true, 'Payment amount is required'],
+    min: 0,
+    default: 0
+  },
+  kyc: {
+    aadharNumber: { 
+      type: String, 
+      required: [true, 'Aadhar number is required'],
+      trim: true 
+    },
+    aadharVerified: { type: Boolean, default: false }
   },
   notes: {
     type: String,
     trim: true
+  },
+  defaultVehicle: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Vehicle',
+    default: null
   }
 }, { timestamps: true });
+
+applyBaseSchema(DriverSchema);
+
+if (!process.env.ENCRYPTION_SECRET) {
+  throw new Error('FATAL ERROR: ENCRYPTION_SECRET environment variable is not defined.');
+}
+
+DriverSchema.plugin(mongooseFieldEncryption, { fields: ['licenseNumber', 'contactNumber', 'kyc.aadharNumber'], secret: process.env.ENCRYPTION_SECRET });
 
 module.exports = mongoose.model('Driver', DriverSchema);
